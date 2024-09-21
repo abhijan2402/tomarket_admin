@@ -15,7 +15,7 @@ const Navbar = () => {
     return pathname === path;
   };
   return (
-    <header className="flex sticky top-0 h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+    <header className="flex sticky z-20 top-0 h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
     <Sheet>
       <SheetTrigger asChild>
         <Button
