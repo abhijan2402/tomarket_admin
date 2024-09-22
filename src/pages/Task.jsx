@@ -31,13 +31,13 @@ export default function Task() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-3 gap-7">
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-7">
           {Array.from({ length: 6 }).map((_, i) => (
             <TaskSkeleton key={i} />
           ))}
         </div>
       ) : tasks.length ? (
-        <div className="grid grid-cols-3 gap-7">
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-7">
           {tasks.map((task) => (
             <TaskCard key={task.id} data={task} />
           ))}
