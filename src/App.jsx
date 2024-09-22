@@ -1,9 +1,9 @@
 import React from "react";
 import { Button } from "./components/ui/button";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { Task } from "./pages/Task";
 import DashboardLayout from "./layout/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
+import Task from "./pages/Task";
 
 const App = () => {
   return (

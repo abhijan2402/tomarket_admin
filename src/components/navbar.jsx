@@ -7,6 +7,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet'
 import { NAV_LINKS } from '@/constant/nav-links'
 import { cn } from '@/lib/utils'
+import { ModeToggle } from './mode-toggle'
 
 const Navbar = () => {
     const { pathname } = useLocation();
@@ -71,6 +72,7 @@ const Navbar = () => {
         </div>
       </form> */}
     </div>
+    <ModeToggle />
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="secondary" size="icon" className="rounded-full">
