@@ -1,4 +1,4 @@
-import { CalendarCheck, Home, Megaphone } from "lucide-react";
+import { Aperture, CalendarCheck, Home, Megaphone } from "lucide-react";
 
 export const NAV_LINKS = [
   {
@@ -10,6 +10,11 @@ export const NAV_LINKS = [
     label: "Task",
     icon: () => <CalendarCheck className="h-4 w-4" />,
     path: "/dashboard/task",
+  },
+  {
+    label: "Logo Management",
+    icon: () => <Aperture className="h-4 w-4" />,
+    path: "/dashboard/logo-management",
   },
   {
     label: "Advertisement",

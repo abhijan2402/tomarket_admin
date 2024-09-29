@@ -13,7 +13,7 @@ import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import * as Yup from "yup";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase"; // Import your firebase setup
+import { db } from "@/lib/firebase";
 import {
   Select,
   SelectContent,
@@ -22,8 +22,9 @@ import {
   SelectValue,
 } from "./ui/select";
 import { cn } from "@/lib/utils";
+import toast from "react-hot-toast";
 
-export default function AddTask({refetch}) {
+export default function AddTask({ refetch }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const {
@@ -64,10 +65,12 @@ export default function AddTask({refetch}) {
         });
 
         resetForm();
-        refetch()
+        refetch();
         setIsOpen(false);
+        toast.success("Task added successfully");
       } catch (error) {
         console.error("Error adding document: ", error);
+        toast.error("Error while adding task! Please try again");
       } finally {
         setSubmitting(false);
       }
