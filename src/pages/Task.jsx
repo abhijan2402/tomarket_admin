@@ -17,6 +17,8 @@ const fetchTasks = async () => {
   querySnapshot.forEach((doc) => {
     items.push({ id: doc.id, ...doc.data() });
   });
+
+  items.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
   return items;
 };
 
