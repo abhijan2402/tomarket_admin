@@ -1,4 +1,4 @@
-import { Aperture, CalendarCheck, Home, Megaphone } from "lucide-react";
+import { Aperture, CalendarCheck, Home, Megaphone, Table } from "lucide-react";
 
 export const NAV_LINKS = [
   {
@@ -15,6 +15,11 @@ export const NAV_LINKS = [
     label: "Logo Management",
     icon: () => <Aperture className="h-4 w-4" />,
     path: "/dashboard/logo-management",
+  },
+  {
+    label: "Category",
+    icon: () => <Table className="h-4 w-4" />,
+    path: "/dashboard/category",
   },
   {
     label: "Advertisement",

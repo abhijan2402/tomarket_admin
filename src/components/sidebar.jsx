@@ -4,11 +4,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { BadgeDollarSign, Bell, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 const Sidebar = () => {
-    const { pathname } = useLocation();
-
-    console.log(pathname)
+  const { pathname } = useLocation();
+  const { logout } = useAuth();
 
   const isActive = (path) => {
     return pathname === path;
@@ -30,6 +30,7 @@ const Sidebar = () => {
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
             {NAV_LINKS.map((link, i) => (
               <Link
+              key={i}
                 to={link.path}
                 className={cn(
                   isActive(link.path)
@@ -45,7 +46,7 @@ const Sidebar = () => {
           </nav>
         </div>
         <div className="mt-auto p-4">
-          <Button className="w-full">
+          <Button onClick={logout} className="w-full">
             Logout <LogOut className="w-4 h-4 ml-2" />
           </Button>
         </div>

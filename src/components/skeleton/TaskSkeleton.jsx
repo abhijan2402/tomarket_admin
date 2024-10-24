@@ -9,10 +9,10 @@ const TaskSkeleton = () => {
     <Card className="">
       <Skeleton className="h-40 mx-3 mt-3 rounded-xl" />
 
-      <div class="mt-4 px-5 pb-5">
+      <div className="mt-4 px-5 pb-5">
         <Skeleton className="h-8" />
 
-        <div class=" mt-2 mb-5">
+        <div className=" mt-2 mb-5">
           <Skeleton className="h-5" />
         </div>
 

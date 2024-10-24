@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
-import { Edit, Trash } from "lucide-react";
 import { Card } from "../ui/card";
+import { cn } from "@/lib/utils";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Edit, Loader2, Trash } from "lucide-react";
+import EditTask from "../edit-task";
 
-const TaskCard = ({ data }) => {
+const TaskCard = ({ data, refetch }) => {
   const getImage = (type) => {
     return type === "twitter"
       ? "/images/twitter.jpg"
@@ -15,39 +19,145 @@ const TaskCard = ({ data }) => {
       ? "/images/Facebook.jpg"
       : "/images/no-image.jpg";
   };
+
+  const [approveLoader, setApproveLoader] = useState(false);
+  const [rejectLoader, setRejectLoader] = useState(false);
+  const [deleteLoader, setDeleteLoader] = useState(false);
+
+  const handleApprove = async (taskId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to approve this task?"
+    );
+    if (confirmed) {
+      try {
+        setApproveLoader(true);
+        const taskDocRef = doc(db, "tasks", taskId);
+        await updateDoc(taskDocRef, {
+          status: "approved",
+        });
+        refetch();
+        console.log(`Task with ID: ${taskId} has been approved.`);
+      } catch (error) {
+        console.error("Error approving task:", error);
+      } finally {
+        setApproveLoader(false);
+      }
+    }
+  };
+
+  const handleDelete = async (taskId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
+    if (confirmed) {
+      try {
+        setDeleteLoader(true);
+        const taskDocRef = doc(db, "tasks", taskId);
+        await deleteDoc(taskDocRef);
+        refetch();
+        console.log(`Task with ID: ${taskId} has been deleted.`);
+      } catch (error) {
+        console.error("Error deleting task:", error);
+      } finally {
+        setDeleteLoader(false);
+      }
+    }
+  };
+
+  const handleReject = async (taskId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to reject this task?"
+    );
+    if (confirmed) {
+      try {
+        setRejectLoader(true);
+        const taskDocRef = doc(db, "tasks", taskId);
+        await updateDoc(taskDocRef, {
+          status: "rejected",
+        });
+        refetch();
+        console.log(`Task with ID: ${taskId} has been rejected.`);
+      } catch (error) {
+        console.error("Error rejecting task:", error);
+      } finally {
+        setRejectLoader(false);
+      }
+    }
+  };
+
   return (
     <Card>
       <a
-        class="relative mx-3 mt-3 flex h-40 overflow-hidden rounded-xl"
+        className="relative mx-3 mt-3 flex h-40 overflow-hidden rounded-xl"
         href="#"
       >
         <img
-          class="object-cover w-full"
+          className="object-cover w-full"
           src={getImage(data?.type)}
           alt="product image"
         />
-        <span class="absolute top-0 left-0 m-2 rounded-full bg-black px-2 text-center text-sm font-medium text-white">
-          Badge
+        <span
+          className={cn(
+            data?.status === "pending"
+              ? "bg-black"
+              : data?.status === "approved"
+              ? "bg-green-600"
+              : "bg-destructive",
+            "absolute top-0 left-0 m-2 rounded-full px-2 text-center text-sm font-medium text-white capitalize"
+          )}
+        >
+          {data?.status}
         </span>
+
+        <div className="absolute top-0 right-0 m-2 flex gap-2">
+          <EditTask data={data} refetch={refetch} />
+
+          <Button
+            size="icon"
+            className="shadow-sm rounded-full"
+            variant="destructive"
+            onClick={() => handleDelete(data?.id)}
+          >
+            <Trash className="w-4 h-4" />
+          </Button>
+        </div>
       </a>
-      <div class="mt-4 px-5 pb-5">
+      <div className="mt-4 px-5 pb-5">
         <a href="#">
-          <h5 class="text-xl font-medium tracking-tight text-slate-900 dark:text-slate-100 tigh truncate">
+          <h5 className="text-xl font-medium tracking-tight text-slate-900 dark:text-slate-100 truncate">
             {data?.title}
           </h5>
         </a>
-        <div class=" mt-2 mb-5 flex items-center justify-between">
-          <p class=" text-sm tracking-tight text-slate-600 dark:text-slate-300 tigh">
+        <div className="mt-2 mb-5 flex items-center justify-between">
+          <p className="text-sm tracking-tight text-slate-600 dark:text-slate-300 truncate">
             {data?.description}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Button className="bg-slate-900 hover:bg-gray-700 dark:hover:bg-[#ebeaea] dark:bg-[#FAFAFA] dark:text-[#18181B]">
-            <Edit className="w-4 h-4 mr-2" /> Edit
+          <Button
+            disabled={data?.status === "rejected" || rejectLoader}
+            variant="destructive"
+            onClick={() => handleReject(data?.id)}
+          >
+            {rejectLoader ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              ""
+            )}
+            Reject
           </Button>
-          <Button variant="destructive">
-            <Trash className="w-4 h-4 mr-2" /> Delete
+          <Button
+            disabled={data?.status === "approved" || approveLoader}
+            className="bg-slate-900 hover:bg-gray-700 dark:hover:bg-[#ebeaea] dark:bg-[#FAFAFA] dark:text-[#18181B]"
+            onClick={() => handleApprove(data?.id)}
+          >
+            {approveLoader ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              ""
+            )}
+            Approve
           </Button>
         </div>
       </div>
@@ -56,7 +166,3 @@ const TaskCard = ({ data }) => {
 };
 
 export default TaskCard;
-
-{
-  /* <Card class="relative flex w-full max-w-xs flex-col overflow-hidden shadow-md"></Card> */
-}

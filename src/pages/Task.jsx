@@ -6,6 +6,10 @@ import { useQuery } from "@tanstack/react-query";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import TaskSkeleton from "@/components/skeleton/TaskSkeleton";
+import { Box, Tab, Tabs } from "@mui/material";
+import { useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useTheme } from "@/components/theme-provider";
 
 const fetchTasks = async () => {
   const querySnapshot = await getDocs(collection(db, "tasks"));
@@ -16,50 +20,142 @@ const fetchTasks = async () => {
   return items;
 };
 
-export default function Task() {
-  const { data: tasks = [], isLoading, refetch } = useQuery({
-    queryKey: ["tasks"],
-    queryFn: fetchTasks,
-    staleTime: 300000, // 5 minutes
-  });
+function CustomTabPanel(props) {
+  const { children, value, index, ...other } = props;
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold md:text-2xl">Task</h1>
-        <AddTask refetch={refetch} />
-      </div>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
 
-      {isLoading ? (
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
+  };
+}
+
+export default function Task() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const defaultTab = parseInt(searchParams.get("tab") || "0", 10);
+
+  const { theme } = useTheme();
+
+  const [value, setValue] = useState(defaultTab);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+    setSearchParams({ tab: newValue });
+  };
+
+  const {
+    data: tasks = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: fetchTasks,
+    staleTime: 300000,
+  });
+
+  const filteredTasks = useMemo(() => {
+    if (value === 1) {
+      return tasks.filter((task) => task.status === "pending");
+    } else if (value === 2) {
+      return tasks.filter((task) => task.status === "approved");
+    } else if (value === 3) {
+      return tasks.filter((task) => task.status === "rejected");
+    }
+    return tasks;
+  }, [tasks, value]);
+
+  const renderTasks = (refetch) => {
+    if (isLoading) {
+      return (
         <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-7">
           {Array.from({ length: 6 }).map((_, i) => (
             <TaskSkeleton key={i} />
           ))}
         </div>
-      ) : tasks.length ? (
-        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-7">
-          {tasks.map((task) => (
-            <TaskCard key={task.id} data={task} />
-          ))}
-        </div>
-      ) : (
-        <div
-          className="flex flex-1 items-center justify-center p-4 rounded-lg border border-dashed shadow-sm"
-          x-chunk="dashboard-02-chunk-1"
-        >
+      );
+    }
+
+    if (!filteredTasks.length) {
+      return (
+        <div className="flex flex-1 items-center justify-center p-4 rounded-lg border border-dashed shadow-sm">
           <div className="flex flex-col items-center gap-1 text-center">
             <h3 className="text-2xl font-bold tracking-tight">
               No Tasks Available
             </h3>
-            <p className="text-sm text-muted-foreground">
-              Get started by creating a task to manage your workflow.
-            </p>
-            <Button className="mt-4">
-              <Plus className="w-4 h-4 mr-2" /> Add Task
-            </Button>
           </div>
         </div>
-      )}
+      );
+    }
+
+    return (
+      <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-7">
+        {filteredTasks.map((task) => (
+          <TaskCard key={task.id} data={task} refetch={refetch} />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-semibold md:text-2xl">Task</h1>
+      </div>
+
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          aria-label="task status tabs"
+        >
+          <Tab
+            sx={{ color: theme === "dark" ? "white" : "" }}
+            label="All"
+            {...a11yProps(0)}
+          />
+          <Tab
+            sx={{ color: theme === "dark" ? "white" : "" }}
+            label="Pending"
+            {...a11yProps(1)}
+          />
+          <Tab
+            sx={{ color: theme === "dark" ? "white" : "" }}
+            label="Approved"
+            {...a11yProps(2)}
+          />
+          <Tab
+            sx={{ color: theme === "dark" ? "white" : "" }}
+            label="Rejected"
+            {...a11yProps(3)}
+          />
+        </Tabs>
+      </Box>
+
+      <CustomTabPanel value={value} index={0}>
+        {renderTasks(refetch)}
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={1}>
+        {renderTasks(refetch)}
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={2}>
+        {renderTasks(refetch)}
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={3}>
+        {renderTasks(refetch)}
+      </CustomTabPanel>
     </main>
   );
 }
