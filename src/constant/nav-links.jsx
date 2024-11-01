@@ -7,9 +7,14 @@ export const NAV_LINKS = [
     path: "/dashboard",
   },
   {
-    label: "Task",
+    label: "Multi Task",
     icon: () => <CalendarCheck className="h-4 w-4" />,
-    path: "/dashboard/task",
+    path: "/dashboard/multi-task",
+  },
+  {
+    label: "Single Task",
+    icon: () => <CalendarCheck className="h-4 w-4" />,
+    path: "/dashboard/single-task",
   },
   {
     label: "Logo Management",

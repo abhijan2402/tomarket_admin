@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import AuthGuard from "./guard/AuthGuard";
 import GuestGuard from "./guard/GuestGuard";
 import Category from "./pages/Category";
+import SingleTask from "./pages/SingleTask";
 
 const App = () => {
   return (
@@ -25,7 +26,8 @@ const App = () => {
           }
         >
           <Route path="" element={<Dashboard />} />
-          <Route path="task" element={<Task />} />
+          <Route path="multi-task" element={<Task />} />
+          <Route path="single-task" element={<SingleTask />} />
           <Route path="logo-management" element={<LogoManagement />} />
           <Route path="advertisement" element={<Advertisement />} />
           <Route path="category" element={<Category />} />

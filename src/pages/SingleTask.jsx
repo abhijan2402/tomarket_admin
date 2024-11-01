@@ -1,7 +1,4 @@
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import TaskCard from "@/components/card/task-card";
-import AddTask from "@/components/add-task";
 import { useQuery } from "@tanstack/react-query";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -12,7 +9,7 @@ import { useSearchParams } from "react-router-dom";
 import { useTheme } from "@/components/theme-provider";
 
 const fetchTasks = async () => {
-  const querySnapshot = await getDocs(collection(db, "tasks"));
+  const querySnapshot = await getDocs(collection(db, "singletasks"));
   const items = [];
   querySnapshot.forEach((doc) => {
     items.push({ id: doc.id, ...doc.data() });
@@ -45,7 +42,7 @@ function a11yProps(index) {
   };
 }
 
-export default function Task() {
+export default function SingleTask() {
   const [searchParams, setSearchParams] = useSearchParams();
   const defaultTab = parseInt(searchParams.get("tab") || "0", 10);
 
@@ -63,7 +60,7 @@ export default function Task() {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["tasks"],
+    queryKey: ["singletasks"],
     queryFn: fetchTasks,
     staleTime: 300000,
   });
@@ -114,7 +111,7 @@ export default function Task() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold md:text-2xl">Multi Task</h1>
+        <h1 className="text-lg font-semibold md:text-2xl">Single Task</h1>
       </div>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>

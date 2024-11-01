@@ -24,7 +24,7 @@ const TaskCard = ({ data, refetch }) => {
       ? "/images/insta.avif"
       : type === "facebook"
       ? "/images/Facebook.jpg"
-      : "/images/no-image.jpg";
+      : "/images/all.webp";
   };
 
   const [approveLoader, setApproveLoader] = useState(false);
@@ -94,59 +94,57 @@ const TaskCard = ({ data, refetch }) => {
 
   return (
     <Card>
-      <div className="absolute top-0 right-0 m-2 flex gap-2">
-        <EditTask data={data} refetch={refetch} />
-
-        <Button
-          size="icon"
-          className="shadow-sm rounded-full"
-          variant="destructive"
-          onClick={() => handleDelete(data?.id)}
-        >
-          <Trash className="w-4 h-4" />
-        </Button>
-      </div>
       {data?.tasks?.length ? (
         <Carousel className="w-full">
           <CarouselContent>
             {data?.tasks?.map((item, index) => (
               <CarouselItem key={index}>
-              <div className="w-full">
-                <div
-                  className="relative mx-3 mt-3 flex   h-40 overflow-hidden rounded-xl"
-               
-                >
-                  <img
-                    className="object-cover w-full"
-                    src={getImage(item?.type)}
-                    alt="product image"
-                  />
-                  <span
-                    className={cn(
-                      data?.status === "pending"
-                        ? "bg-black"
-                        : data?.status === "approved"
-                        ? "bg-green-600"
-                        : "bg-destructive",
-                      "absolute top-0 left-0 m-2 rounded-full px-2 text-center text-sm font-medium text-white capitalize"
-                    )}
-                  >
-                    {item?.status}
-                  </span>
-                </div>
-                <div className="mt-4 px-5 ">
-                  <a href="#">
-                    <h5 className="text-xl font-medium tracking-tight text-slate-900 dark:text-slate-100 truncate">
-                      {item?.title}
-                    </h5>
-                  </a>
-                  <div className="mt-2 mb-5 flex items-center justify-between">
-                    <p className="text-sm tracking-tight text-slate-600 dark:text-slate-300 truncate">
-                      {item?.description}
-                    </p>
+                <div className="w-full">
+                  <div className="relative mx-3 mt-3 flex   h-40 overflow-hidden rounded-xl">
+                    <img
+                      className="object-cover w-full"
+                      src={getImage(item?.type)}
+                      alt="product image"
+                    />
+                    <span
+                      className={cn(
+                        data?.status === "pending"
+                          ? "bg-black"
+                          : data?.status === "approved"
+                          ? "bg-green-600"
+                          : "bg-destructive",
+                        "absolute top-0 left-0 m-2 rounded-full px-2 text-center text-sm font-medium text-white capitalize"
+                      )}
+                    >
+                      {data?.status}
+                    </span>
+
+                    <div className="absolute top-0 right-0 m-2 flex gap-2">
+                      <EditTask data={data} refetch={refetch} />
+
+                      <Button
+                        size="icon"
+                        className="shadow-sm rounded-full"
+                        variant="destructive"
+                        onClick={() => handleDelete(data?.id)}
+                      >
+                        <Trash className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="mt-4 px-5 ">
+                    <a href="#">
+                      <h5 className="text-xl font-medium tracking-tight text-slate-900 dark:text-slate-100 truncate">
+                        {item?.title}
+                      </h5>
+                    </a>
+                    <div className="mt-2 mb-5 flex items-center justify-between">
+                      <p className="text-sm tracking-tight text-slate-600 dark:text-slate-300 truncate">
+                        {item?.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
               </CarouselItem>
             ))}
           </CarouselContent>
