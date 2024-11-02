@@ -4,7 +4,7 @@ import { Card, CardContent } from "../ui/card";
 import { cn } from "@/lib/utils";
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Edit, Loader2, Trash } from "lucide-react";
+import { Loader2, Trash } from "lucide-react";
 import EditTask from "../edit-task";
 import {
   Carousel,
@@ -13,6 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
+import EditMultiTask from "../edit-multi-task";
 
 const TaskCard = ({ data, refetch }) => {
   const getImage = (type) => {
@@ -31,14 +32,14 @@ const TaskCard = ({ data, refetch }) => {
   const [rejectLoader, setRejectLoader] = useState(false);
   const [deleteLoader, setDeleteLoader] = useState(false);
 
-  const handleApprove = async (taskId) => {
+  const handleApprove = async (taskId, dbname) => {
     const confirmed = window.confirm(
       "Are you sure you want to approve this task?"
     );
     if (confirmed) {
       try {
         setApproveLoader(true);
-        const taskDocRef = doc(db, "tasks", taskId);
+        const taskDocRef = doc(db, dbname, taskId);
         await updateDoc(taskDocRef, {
           status: "approved",
         });
@@ -52,33 +53,33 @@ const TaskCard = ({ data, refetch }) => {
     }
   };
 
-  const handleDelete = async (taskId) => {
+  const handleDelete = async (taskId, dbname) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this task?"
     );
     if (confirmed) {
       try {
         setDeleteLoader(true);
-        const taskDocRef = doc(db, "tasks", taskId);
+        const taskDocRef = doc(db, dbname, taskId);
         await deleteDoc(taskDocRef);
         refetch();
         console.log(`Task with ID: ${taskId} has been deleted.`);
       } catch (error) {
         console.error("Error deleting task:", error);
       } finally {
-        setDeleteLoader(false);
+        setDeleteLoader((prevState) => false);
       }
     }
   };
 
-  const handleReject = async (taskId) => {
+  const handleReject = async (taskId, dbname) => {
     const confirmed = window.confirm(
       "Are you sure you want to reject this task?"
     );
     if (confirmed) {
       try {
         setRejectLoader(true);
-        const taskDocRef = doc(db, "tasks", taskId);
+        const taskDocRef = doc(db, dbname, taskId);
         await updateDoc(taskDocRef, {
           status: "rejected",
         });
@@ -118,21 +119,34 @@ const TaskCard = ({ data, refetch }) => {
                     >
                       {data?.status}
                     </span>
+                  </div>
 
-                    <div className="absolute top-0 right-0 m-2 flex gap-2">
-                      <EditTask data={data} refetch={refetch} />
+                  <div className="px-5 mt-2 flex justify-between items-center">
+                    <div>
+                      <span className="text-xs text-blue-800 font-bold  bg-gray-200 px-2 py-1 ">
+                        {item?.category}
+                      </span>
+                    </div>
+                    <div className="top-0 right-0 flex gap-2">
+                      <EditMultiTask data={data} refetch={refetch} />
 
                       <Button
+                        disabled={deleteLoader}
                         size="icon"
                         className="shadow-sm rounded-full"
                         variant="destructive"
-                        onClick={() => handleDelete(data?.id)}
+                        onClick={() => handleDelete(data?.id, "tasks")}
                       >
-                        <Trash className="w-4 h-4" />
+                        {deleteLoader ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash className="w-4 h-4" />
+                        )}
                       </Button>
                     </div>
                   </div>
-                  <div className="mt-4 px-5 ">
+
+                  <div className="mt-1 px-5 ">
                     <a href="#">
                       <h5 className="text-xl font-medium tracking-tight text-slate-900 dark:text-slate-100 truncate">
                         {item?.title}
@@ -174,21 +188,30 @@ const TaskCard = ({ data, refetch }) => {
             >
               {data?.status}
             </span>
+          </a>
 
-            <div className="absolute top-0 right-0 m-2 flex gap-2">
+          <div className="px-5 mt-2 flex justify-between items-center">
+            <div>
+              <span className="text-xs text-blue-800 font-bold  bg-gray-200 px-2 py-1 ">
+                {data?.category}
+              </span>
+            </div>
+
+            <div className="flex gap-2">
               <EditTask data={data} refetch={refetch} />
 
               <Button
                 size="icon"
                 className="shadow-sm rounded-full"
                 variant="destructive"
-                onClick={() => handleDelete(data?.id)}
+                onClick={() => handleDelete(data?.id, "singletasks")}
               >
                 <Trash className="w-4 h-4" />
               </Button>
             </div>
-          </a>
-          <div className="mt-4 px-5 ">
+          </div>
+
+          <div className="mt-1 px-5 ">
             <a href="#">
               <h5 className="text-xl font-medium tracking-tight text-slate-900 dark:text-slate-100 truncate">
                 {data?.title}
@@ -208,7 +231,12 @@ const TaskCard = ({ data, refetch }) => {
           <Button
             disabled={data?.status === "rejected" || rejectLoader}
             variant="destructive"
-            onClick={() => handleReject(data?.id)}
+            onClick={() =>
+              handleReject(
+                data?.id,
+                data?.tasks?.length ? "tasks" : "singletasks"
+              )
+            }
           >
             {rejectLoader ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -220,7 +248,12 @@ const TaskCard = ({ data, refetch }) => {
           <Button
             disabled={data?.status === "approved" || approveLoader}
             className="bg-slate-900 hover:bg-gray-700 dark:hover:bg-[#ebeaea] dark:bg-[#FAFAFA] dark:text-[#18181B]"
-            onClick={() => handleApprove(data?.id)}
+            onClick={() =>
+              handleApprove(
+                data?.id,
+                data?.tasks?.length ? "tasks" : "singletasks"
+              )
+            }
           >
             {approveLoader ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

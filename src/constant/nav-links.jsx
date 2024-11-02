@@ -1,4 +1,4 @@
-import { Aperture, CalendarCheck, Home, Megaphone, Table } from "lucide-react";
+import { Aperture, CalendarCheck, ClipboardList, Home, LayoutDashboard, Megaphone, Table } from "lucide-react";
 
 export const NAV_LINKS = [
   {
@@ -8,13 +8,18 @@ export const NAV_LINKS = [
   },
   {
     label: "Multi Task",
-    icon: () => <CalendarCheck className="h-4 w-4" />,
+    icon: () => <ClipboardList className="h-4 w-4" />,
     path: "/dashboard/multi-task",
   },
   {
     label: "Single Task",
     icon: () => <CalendarCheck className="h-4 w-4" />,
     path: "/dashboard/single-task",
+  },
+  {
+    label: "Home Layout",
+    icon: () => <LayoutDashboard className="h-4 w-4" />,
+    path: "/dashboard/home-layout",
   },
   {
     label: "Logo Management",

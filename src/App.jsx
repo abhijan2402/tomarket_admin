@@ -11,6 +11,7 @@ import AuthGuard from "./guard/AuthGuard";
 import GuestGuard from "./guard/GuestGuard";
 import Category from "./pages/Category";
 import SingleTask from "./pages/SingleTask";
+import HomeLayout from "./pages/HomeLayout";
 
 const App = () => {
   return (
@@ -28,6 +29,7 @@ const App = () => {
           <Route path="" element={<Dashboard />} />
           <Route path="multi-task" element={<Task />} />
           <Route path="single-task" element={<SingleTask />} />
+          <Route path="home-layout" element={<HomeLayout />} />
           <Route path="logo-management" element={<LogoManagement />} />
           <Route path="advertisement" element={<Advertisement />} />
           <Route path="category" element={<Category />} />

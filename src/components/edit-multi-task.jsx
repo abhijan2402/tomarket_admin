@@ -30,7 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 
-export default function EditTask({ refetch, data }) {
+export default function EditMultiTask({ refetch, data }) {
   const [isOpen, setIsOpen] = useState(false);
   const isEditMode = !!data?.id;
 
@@ -73,7 +73,8 @@ export default function EditTask({ refetch, data }) {
           });
           toast.success("Task updated successfully");
         } else {
-          await addDoc(collection(db, "singletasks"), {
+          // Add a new task
+          await addDoc(collection(db, "tasks"), {
             title: values.title,
             description: values.description,
             reward: values.reward,
