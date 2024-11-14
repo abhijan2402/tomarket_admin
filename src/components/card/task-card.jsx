@@ -226,44 +226,46 @@ const TaskCard = ({ data, refetch }) => {
         </>
       )}
 
-      <div className="pb-5 mt-auto px-5">
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            disabled={data?.status === "rejected" || rejectLoader}
-            variant="destructive"
-            onClick={() =>
-              handleReject(
-                data?.id,
-                data?.tasks?.length ? "tasks" : "singletasks"
-              )
-            }
-          >
-            {rejectLoader ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              ""
-            )}
-            Reject
-          </Button>
-          <Button
-            disabled={data?.status === "approved" || approveLoader}
-            className="bg-slate-900 hover:bg-gray-700 dark:hover:bg-[#ebeaea] dark:bg-[#FAFAFA] dark:text-[#18181B]"
-            onClick={() =>
-              handleApprove(
-                data?.id,
-                data?.tasks?.length ? "tasks" : "singletasks"
-              )
-            }
-          >
-            {approveLoader ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              ""
-            )}
-            Approve
-          </Button>
+      {data.status === "pending" ? (
+        <div className="pb-5 mt-auto px-5">
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              disabled={data?.status === "rejected" || rejectLoader}
+              variant="destructive"
+              onClick={() =>
+                handleReject(
+                  data?.id,
+                  data?.tasks?.length ? "tasks" : "singletasks"
+                )
+              }
+            >
+              {rejectLoader ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                ""
+              )}
+              Reject
+            </Button>
+            <Button
+              disabled={data?.status === "approved" || approveLoader}
+              className="bg-slate-900 hover:bg-gray-700 dark:hover:bg-[#ebeaea] dark:bg-[#FAFAFA] dark:text-[#18181B]"
+              onClick={() =>
+                handleApprove(
+                  data?.id,
+                  data?.tasks?.length ? "tasks" : "singletasks"
+                )
+              }
+            >
+              {approveLoader ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                ""
+              )}
+              Approve
+            </Button>
+          </div>
         </div>
-      </div>
+      ) : null}
     </Card>
   );
 };

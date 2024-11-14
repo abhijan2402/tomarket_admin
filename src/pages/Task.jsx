@@ -1,5 +1,3 @@
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import TaskCard from "@/components/card/task-card";
 import AddTask from "@/components/add-task";
 import { useQuery } from "@tanstack/react-query";
@@ -47,7 +45,7 @@ function a11yProps(index) {
 
 export default function Task() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const defaultTab = parseInt(searchParams.get("tab") || "0", 10);
+  const defaultTab = parseInt(searchParams.get("tab") || "1", 10);
 
   const { theme } = useTheme();
 
@@ -69,11 +67,11 @@ export default function Task() {
   });
 
   const filteredTasks = useMemo(() => {
-    if (value === 1) {
+    if (value === 0) {
       return tasks.filter((task) => task.status === "pending");
-    } else if (value === 2) {
+    } else if (value === 1) {
       return tasks.filter((task) => task.status === "approved");
-    } else if (value === 3) {
+    } else if (value === 2) {
       return tasks.filter((task) => task.status === "rejected");
     }
     return tasks;
@@ -115,6 +113,8 @@ export default function Task() {
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold md:text-2xl">Multi Task</h1>
+
+        <AddTask refetch={refetch} />
       </div>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -123,11 +123,11 @@ export default function Task() {
           onChange={handleChange}
           aria-label="task status tabs"
         >
-          <Tab
+          {/* <Tab
             sx={{ color: theme === "dark" ? "white" : "" }}
             label="All"
             {...a11yProps(0)}
-          />
+          /> */}
           <Tab
             sx={{ color: theme === "dark" ? "white" : "" }}
             label="Pending"
@@ -146,6 +146,9 @@ export default function Task() {
         </Tabs>
       </Box>
 
+      {/* <CustomTabPanel value={value} index={0}>
+        {renderTasks(refetch)}
+      </CustomTabPanel> */}
       <CustomTabPanel value={value} index={0}>
         {renderTasks(refetch)}
       </CustomTabPanel>
@@ -153,9 +156,6 @@ export default function Task() {
         {renderTasks(refetch)}
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        {renderTasks(refetch)}
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={3}>
         {renderTasks(refetch)}
       </CustomTabPanel>
     </main>

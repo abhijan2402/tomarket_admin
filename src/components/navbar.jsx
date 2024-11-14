@@ -1,5 +1,5 @@
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
-import React from "react";
+import React, { useState } from "react";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -10,7 +10,6 @@ import {
 import { Button } from "./ui/button";
 import {
   BadgeDollarSign,
-  CircleUser,
   CircleUserIcon,
   LogOut,
   Menu,
@@ -24,16 +23,27 @@ import { useAuth } from "@/context/AuthContext";
 
 const Navbar = () => {
   const { pathname } = useLocation();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const isActive = (path) => {
     return pathname === path;
   };
+
+  const handleLinkClick = () => {
+    setIsSheetOpen(false);
+  };
+
   return (
     <header className="flex sticky z-20 top-0 h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-      <Sheet>
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+          <Button
+            variant="outline"
+            size="icon"
+            className="shrink-0 md:hidden"
+            onClick={() => setIsSheetOpen(true)}
+          >
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle navigation menu</span>
           </Button>
@@ -43,29 +53,33 @@ const Navbar = () => {
             <Link
               to="/"
               className="flex items-center gap-2 text-lg font-semibold"
+              onClick={handleLinkClick} // Close the Sheet on click
             >
               <BadgeDollarSign className="h-6 w-6" />
-              <span>ToMarket Amdin</span>
+              <span>ToMarket Admin</span>
             </Link>
-
-            {NAV_LINKS.map((link, i) => (
-              <Link
-              key={i}
-                to={link.path}
-                className={cn(
-                  isActive(link.path)
-                    ? "bg-muted text-primary"
-                    : "text-muted-foreground ",
-                  "mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground"
-                )}
-              >
-                {link.icon()}
-                {link.label}
-              </Link>
-            ))}
+        
+            {NAV_LINKS.map((link, i) =>
+              link.label === "Admins" && user.role !== "super-admin" ? null : (
+                <Link
+                  key={i}
+                  to={link.path}
+                  className={cn(
+                    isActive(link.path)
+                      ? "bg-muted text-primary"
+                      : "text-muted-foreground ",
+                    "mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:text-foreground"
+                  )}
+                  onClick={handleLinkClick}
+                >
+                  {link.icon()}
+                  {link.label}
+                </Link>
+              )
+            )}
           </nav>
           <div className="mt-auto">
-            <Button className="w-full">
+            <Button className="w-full" onClick={logout}>
               Logout <LogOut className="w-4 h-4 ml-2" />
             </Button>
           </div>

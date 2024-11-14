@@ -12,6 +12,7 @@ import GuestGuard from "./guard/GuestGuard";
 import Category from "./pages/Category";
 import SingleTask from "./pages/SingleTask";
 import HomeLayout from "./pages/HomeLayout";
+import Admins from "./pages/Admins";
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="home-layout" element={<HomeLayout />} />
           <Route path="logo-management" element={<LogoManagement />} />
           <Route path="advertisement" element={<Advertisement />} />
+          <Route path="admins" element={<Admins />} />
           <Route path="category" element={<Category />} />
         </Route>
 

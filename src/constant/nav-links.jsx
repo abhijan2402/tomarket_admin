@@ -1,4 +1,4 @@
-import { Aperture, CalendarCheck, ClipboardList, Home, LayoutDashboard, Megaphone, Table } from "lucide-react";
+import { Aperture, CalendarCheck, ClipboardList, Home, LayoutDashboard, Megaphone, Table, Users } from "lucide-react";
 
 export const NAV_LINKS = [
   {
@@ -15,6 +15,11 @@ export const NAV_LINKS = [
     label: "Single Task",
     icon: () => <CalendarCheck className="h-4 w-4" />,
     path: "/dashboard/single-task",
+  },
+  {
+    label: "Admins",
+    icon: () => <Users className="h-4 w-4" />,
+    path: "/dashboard/admins",
   },
   {
     label: "Home Layout",

@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 
 const Sidebar = () => {
   const { pathname } = useLocation();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const isActive = (path) => {
     return pathname === path;
@@ -28,21 +28,23 @@ const Sidebar = () => {
         </div>
         <div className="flex-1">
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-            {NAV_LINKS.map((link, i) => (
-              <Link
-              key={i}
-                to={link.path}
-                className={cn(
-                  isActive(link.path)
-                    ? "bg-muted text-primary"
-                    : "text-muted-foreground ",
-                  "flex items-center gap-3 rounded-lg px-3 py-2  transition-all hover:text-primary"
-                )}
-              >
-                {link.icon()}
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link, i) =>
+              link.label === "Admins" && user.role !== "super-admin" ? null : (
+                <Link
+                  key={i}
+                  to={link.path}
+                  className={cn(
+                    isActive(link.path)
+                      ? "bg-muted text-primary"
+                      : "text-muted-foreground ",
+                    "flex items-center gap-3 rounded-lg px-3 py-2  transition-all hover:text-primary"
+                  )}
+                >
+                  {link.icon()}
+                  {link.label}
+                </Link>
+              )
+            )}
           </nav>
         </div>
         <div className="mt-auto p-4">
