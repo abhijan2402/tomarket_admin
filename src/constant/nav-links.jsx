@@ -1,4 +1,4 @@
-import { Aperture, CalendarCheck, ClipboardList, Home, LayoutDashboard, Megaphone, Table, Users } from "lucide-react";
+import { Aperture, CalendarCheck, ClipboardList, Home, LayoutDashboard, Megaphone, Table, User, User2, Users, Users2 } from "lucide-react";
 
 export const NAV_LINKS = [
   {
@@ -18,8 +18,13 @@ export const NAV_LINKS = [
   },
   {
     label: "Admins",
-    icon: () => <Users className="h-4 w-4" />,
+    icon: () => <Users2 className="h-4 w-4" />,
     path: "/dashboard/admins",
+  },
+  {
+    label: "Users",
+    icon: () => <Users className="h-4 w-4" />,
+    path: "/dashboard/users",
   },
   {
     label: "Home Layout",

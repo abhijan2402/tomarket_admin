@@ -18,7 +18,14 @@ import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
 import { Button } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  query,
+  where,
+} from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
@@ -26,12 +33,38 @@ import toast from "react-hot-toast";
 import { Badge } from "@/components/ui/badge";
 
 const fetchAdmins = async () => {
-  const querySnapshot = await getDocs(collection(db, "users"));
-  const admins = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  return admins;
+  try {
+    const superAdminQuery = query(
+      collection(db, "users"),
+      where("role", "==", "super-admin")
+    );
+    const adminQuery = query(
+      collection(db, "users"),
+      where("role", "==", "admin")
+    );
+
+    const [superAdminSnapshot, adminSnapshot] = await Promise.all([
+      getDocs(superAdminQuery),
+      getDocs(adminQuery),
+    ]);
+
+    const superAdmins = superAdminSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    const admins = adminSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    const combinedResults = [...superAdmins, ...admins];
+
+    return combinedResults;
+  } catch (error) {
+    console.error("Error fetching admins:", error);
+    return [];
+  }
 };
 
 export default function Admins() {
@@ -52,7 +85,6 @@ export default function Admins() {
     staleTime: 300000,
   });
 
-  // Function to toggle admin activation status
   const handleToggleActiveStatus = async (admin) => {
     try {
       setLoading(true);
@@ -76,7 +108,7 @@ export default function Admins() {
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold md:text-2xl">Admin</h1>
-        <AddAdmin />
+        <AddAdmin refetch={refetch} />
       </div>
 
       <div className="w-[350px] md:w-auto  overflow-x-hidden">

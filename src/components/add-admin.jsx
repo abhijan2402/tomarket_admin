@@ -70,7 +70,7 @@ export default function AddAdmin({ refetch }) {
         });
 
         resetForm();
-        // refetch();
+        refetch();
         setIsOpen(false);
         toast.success(`${values.role} added successfully`);
       } catch (error) {

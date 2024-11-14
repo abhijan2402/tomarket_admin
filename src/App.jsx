@@ -13,6 +13,7 @@ import Category from "./pages/Category";
 import SingleTask from "./pages/SingleTask";
 import HomeLayout from "./pages/HomeLayout";
 import Admins from "./pages/Admins";
+import Users from "./pages/Users";
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
           <Route path="logo-management" element={<LogoManagement />} />
           <Route path="advertisement" element={<Advertisement />} />
           <Route path="admins" element={<Admins />} />
+          <Route path="users" element={<Users />} />
           <Route path="category" element={<Category />} />
         </Route>
 
