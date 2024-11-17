@@ -13,7 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
-import EditMultiTask from "../edit-multi-task";
+import EditGroupTask from "../edit-group-task";
 
 const TaskCard = ({ data, refetch }) => {
   const getImage = (type) => {
@@ -128,7 +128,7 @@ const TaskCard = ({ data, refetch }) => {
                       </span>
                     </div>
                     <div className="top-0 right-0 flex gap-2">
-                      <EditMultiTask data={data} refetch={refetch} />
+                      <EditGroupTask data={data} refetch={refetch} />
 
                       <Button
                         disabled={deleteLoader}

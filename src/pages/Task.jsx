@@ -1,5 +1,4 @@
 import TaskCard from "@/components/card/task-card";
-import AddTask from "@/components/add-task";
 import { useQuery } from "@tanstack/react-query";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -8,6 +7,7 @@ import { Box, Tab, Tabs } from "@mui/material";
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTheme } from "@/components/theme-provider";
+import AddGroupTask from "@/components/add-group-task";
 
 const fetchTasks = async () => {
   const querySnapshot = await getDocs(collection(db, "tasks"));
@@ -45,7 +45,7 @@ function a11yProps(index) {
 
 export default function Task() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const defaultTab = parseInt(searchParams.get("tab") || "1", 10);
+  const defaultTab = parseInt(searchParams.get("tab") || "0", 10);
 
   const { theme } = useTheme();
 
@@ -114,7 +114,7 @@ export default function Task() {
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold md:text-2xl">Multi Task</h1>
 
-        <AddTask refetch={refetch} />
+        <AddGroupTask refetch={refetch} />
       </div>
 
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>

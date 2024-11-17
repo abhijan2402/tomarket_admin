@@ -12,7 +12,12 @@ import { useFormik } from "formik";
 import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import * as Yup from "yup";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
   Select,
@@ -23,9 +28,28 @@ import {
 } from "./ui/select";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
+
+const fetchCategories = async () => {
+  const querySnapshot = await getDocs(collection(db, "categories"));
+  const categories = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  return categories.sort((a, b) => a.position - b.position);
+};
 
 export default function AddTask({ refetch }) {
   const [isOpen, setIsOpen] = useState(false);
+
+  const {
+    data: categories = [],
+   
+  } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+    staleTime: 300000,
+  });
 
   const {
     values,
@@ -44,6 +68,7 @@ export default function AddTask({ refetch }) {
       reward: "",
       link: "",
       type: "",
+      category: "",
     },
     validationSchema: Yup.object({
       title: Yup.string().required("Title is required"),
@@ -51,17 +76,21 @@ export default function AddTask({ refetch }) {
       reward: Yup.number().required("Reward is required"),
       link: Yup.string().url("Invalid URL").required("Link is required"),
       type: Yup.string().required("Type is required"),
+      category: Yup.string().required("category is required"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        await addDoc(collection(db, "tasks"), {
+        await addDoc(collection(db, "singletasks"), {
           title: values.title,
           description: values.description,
           reward: values.reward,
           link: values.link,
-          type: values.type,
+          type: 'single',
+          category: values.category,
+          platformLogo: values.type,
           createdAt: serverTimestamp(),
           createdBy: "admin",
+          status: 'pending'
         });
 
         resetForm();
@@ -161,13 +190,38 @@ export default function AddTask({ refetch }) {
           </div>
 
           <div>
+            <Select onValueChange={(value) => setFieldValue("category", value)}>
+              <SelectTrigger
+                className={cn(
+                  touched.category && errors.category ? "border-red-500" : ""
+                )}
+              >
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories?.map((item) => (
+                  <SelectItem key={item.id} value={item.name}>
+                    {item.name}
+                  </SelectItem>
+                ))}
+
+            
+              </SelectContent>
+            </Select>
+
+            {touched.category && errors.category ? (
+              <div className="text-red-500 text-sm mt-1">{errors.category}</div>
+            ) : null}
+          </div>
+
+          <div>
             <Select onValueChange={(value) => setFieldValue("type", value)}>
               <SelectTrigger
                 className={cn(
                   touched.type && errors.type ? "border-red-500" : ""
                 )}
               >
-                <SelectValue placeholder="Select Type" />
+                <SelectValue placeholder="Select Logo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="instagram">Instagram</SelectItem>

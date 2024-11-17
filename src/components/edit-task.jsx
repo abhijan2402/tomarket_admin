@@ -18,6 +18,7 @@ import {
   updateDoc,
   serverTimestamp,
   addDoc,
+  getDocs,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
@@ -29,10 +30,30 @@ import {
 } from "./ui/select";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
+
+
+const fetchCategories = async () => {
+  const querySnapshot = await getDocs(collection(db, "categories"));
+  const categories = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  return categories.sort((a, b) => a.position - b.position);
+};
 
 export default function EditTask({ refetch, data }) {
   const [isOpen, setIsOpen] = useState(false);
   const isEditMode = !!data?.id;
+
+  const {
+    data: categories = [],
+   
+  } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+    staleTime: 300000,
+  });
 
   const {
     values,
@@ -50,7 +71,8 @@ export default function EditTask({ refetch, data }) {
       description: data?.description || "",
       reward: data?.reward || "",
       link: data?.link || "",
-      type: data?.type || "",
+      type: data?.platformLogo || "",
+      category: data?.category || "",
     },
     validationSchema: Yup.object({
       title: Yup.string().required("Title is required"),
@@ -58,32 +80,22 @@ export default function EditTask({ refetch, data }) {
       reward: Yup.number().required("Reward is required"),
       link: Yup.string().url("Invalid URL").required("Link is required"),
       type: Yup.string().required("Type is required"),
+      category: Yup.string().required("category is required"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        if (isEditMode) {
-          const taskRef = doc(db, "singletasks", data.id);
-          await updateDoc(taskRef, {
-            title: values.title,
-            description: values.description,
-            reward: values.reward,
-            link: values.link,
-            type: values.type,
-            updatedAt: serverTimestamp(),
-          });
-          toast.success("Task updated successfully");
-        } else {
-          await addDoc(collection(db, "singletasks"), {
-            title: values.title,
-            description: values.description,
-            reward: values.reward,
-            link: values.link,
-            type: values.type,
-            createdAt: serverTimestamp(),
-            createdBy: "admin",
-          });
-          toast.success("Task added successfully");
-        }
+        const taskRef = doc(db, "singletasks", data.id);
+        await updateDoc(taskRef, {
+          title: values.title,
+          description: values.description,
+          reward: values.reward,
+          link: values.link,
+          platformLogo: values.type,
+          type: "single",
+          category: values.category,
+          updatedAt: serverTimestamp(),
+        });
+        toast.success("Task updated successfully");
 
         resetForm();
         refetch();
@@ -181,6 +193,31 @@ export default function EditTask({ refetch, data }) {
             />
             {touched.link && errors.link ? (
               <div className="text-red-500 text-sm mt-1">{errors.link}</div>
+            ) : null}
+          </div>
+
+          <div>
+            <Select onValueChange={(value) => setFieldValue("category", value)}>
+              <SelectTrigger
+                className={cn(
+                  touched.category && errors.category ? "border-red-500" : ""
+                )}
+              >
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories?.map((item) => (
+                  <SelectItem key={item.id} value={item.name}>
+                    {item.name}
+                  </SelectItem>
+                ))}
+
+            
+              </SelectContent>
+            </Select>
+
+            {touched.category && errors.category ? (
+              <div className="text-red-500 text-sm mt-1">{errors.category}</div>
             ) : null}
           </div>
 

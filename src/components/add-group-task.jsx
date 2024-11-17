@@ -9,15 +9,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useFormik } from "formik";
-import { Edit, Loader2, Trash } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { useState } from "react";
 import * as Yup from "yup";
 import {
   collection,
-  doc,
-  updateDoc,
-  serverTimestamp,
   addDoc,
+  serverTimestamp,
+  getDocs,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
@@ -29,10 +28,27 @@ import {
 } from "./ui/select";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
 
-export default function EditMultiTask({ refetch, data }) {
+const fetchCategories = async () => {
+  const querySnapshot = await getDocs(collection(db, "categories"));
+  const categories = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  return categories.sort((a, b) => a.position - b.position);
+};
+
+export default function AddGroupTask({ refetch }) {
   const [isOpen, setIsOpen] = useState(false);
-  const isEditMode = !!data?.id;
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+    staleTime: 300000,
+  });
 
   const {
     values,
@@ -46,11 +62,12 @@ export default function EditMultiTask({ refetch, data }) {
     resetForm,
   } = useFormik({
     initialValues: {
-      title: data?.title || "",
-      description: data?.description || "",
-      reward: data?.reward || "",
-      link: data?.link || "",
-      type: data?.type || "",
+      title: "",
+      description: "",
+      reward: "",
+      link: "",
+      type: "",
+      category: "",
     },
     validationSchema: Yup.object({
       title: Yup.string().required("Title is required"),
@@ -58,61 +75,96 @@ export default function EditMultiTask({ refetch, data }) {
       reward: Yup.number().required("Reward is required"),
       link: Yup.string().url("Invalid URL").required("Link is required"),
       type: Yup.string().required("Type is required"),
+      category: Yup.string().required("Category is required"),
     }),
-    onSubmit: async (values, { setSubmitting }) => {
-      try {
-        if (isEditMode) {
-          const taskRef = doc(db, "singletasks", data.id);
-          await updateDoc(taskRef, {
-            title: values.title,
-            description: values.description,
-            reward: values.reward,
-            link: values.link,
-            type: values.type,
-            updatedAt: serverTimestamp(),
-          });
-          toast.success("Task updated successfully");
-        } else {
-          // Add a new task
-          await addDoc(collection(db, "tasks"), {
-            title: values.title,
-            description: values.description,
-            reward: values.reward,
-            link: values.link,
-            type: values.type,
-            createdAt: serverTimestamp(),
-            createdBy: "admin",
-          });
-          toast.success("Task added successfully");
-        }
+    onSubmit: async (values) => {
+      setTasks((prev) => [
+        ...prev,
+        {
+          title: values.title,
+          description: values.description,
+          reward: values.reward,
+          link: values.link,
+          category: values.category,
+          platformLogo: values.type,
+        },
+      ]);
 
-        resetForm();
-        refetch();
-        setIsOpen(false);
-      } catch (error) {
-        console.error("Error saving document: ", error);
-        toast.error("Error while saving task! Please try again");
-      } finally {
-        setSubmitting(false);
-      }
+      resetForm();
+      setFieldValue("type", "");
+      setFieldValue("category", "");
     },
   });
+
+  const handleAdd = async () => {
+    try {
+      setLoading(true);
+      await addDoc(collection(db, "tasks"), {
+        tasks,
+        createdAt: serverTimestamp(),
+        createdBy: "admin",
+        status: "pending",
+      });
+
+      setTasks([]);
+      refetch();
+      setIsOpen(false);
+      toast.success("Task added successfully");
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      toast.error("Error while adding task! Please try again");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button
-          onClick={() => setIsOpen(true)}
-          size="icon"
-          className="shadow-sm rounded-full"
-        >
-          <Edit className="w-4 h-4" />
+        <Button onClick={() => setIsOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" /> Add Group Task
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? "Edit Task" : "Add Task"}</DialogTitle>
+          <DialogTitle>Add Group Task</DialogTitle>
         </DialogHeader>
+
+        {tasks?.length ? (
+          <div className="border border-primary p-2 rounded-md">
+            {tasks.map((item, i) => (
+              <div key={i} className="flex justify-between border-b p-2">
+                {item.title}
+                <Button
+                  onClick={() =>
+                    setTasks((prev) => prev.filter((_, index) => index !== i))
+                  }
+                  size="icon"
+                  variant="destructive"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+
+            <div>
+              <Button
+                className="w-full mt-5"
+                onClick={handleAdd}
+                disabled={loading}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" /> Adding...
+                  </>
+                ) : (
+                  "Add Group Tasks"
+                )}
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div>
             <Input
@@ -126,9 +178,9 @@ export default function EditMultiTask({ refetch, data }) {
               onChange={handleChange}
               onBlur={handleBlur}
             />
-            {touched.title && errors.title ? (
+            {touched.title && errors.title && (
               <div className="text-red-500 text-sm mt-1">{errors.title}</div>
-            ) : null}
+            )}
           </div>
 
           <div>
@@ -145,11 +197,11 @@ export default function EditMultiTask({ refetch, data }) {
                   : ""
               )}
             />
-            {touched.description && errors.description ? (
+            {touched.description && errors.description && (
               <div className="text-red-500 text-sm mt-1">
                 {errors.description}
               </div>
-            ) : null}
+            )}
           </div>
 
           <div>
@@ -163,9 +215,9 @@ export default function EditMultiTask({ refetch, data }) {
               onChange={handleChange}
               onBlur={handleBlur}
             />
-            {touched.reward && errors.reward ? (
+            {touched.reward && errors.reward && (
               <div className="text-red-500 text-sm mt-1">{errors.reward}</div>
-            ) : null}
+            )}
           </div>
 
           <div>
@@ -180,22 +232,42 @@ export default function EditMultiTask({ refetch, data }) {
               onChange={handleChange}
               onBlur={handleBlur}
             />
-            {touched.link && errors.link ? (
+            {touched.link && errors.link && (
               <div className="text-red-500 text-sm mt-1">{errors.link}</div>
-            ) : null}
+            )}
           </div>
 
           <div>
-            <Select
-              onValueChange={(value) => setFieldValue("type", value)}
-              value={values.type}
-            >
+            <Select onValueChange={(value) => setFieldValue("category", value)}>
+              <SelectTrigger
+                className={cn(
+                  touched.category && errors.category ? "border-red-500" : ""
+                )}
+              >
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((item) => (
+                  <SelectItem key={item.id} value={item.name}>
+                    {item.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {touched.category && errors.category && (
+              <div className="text-red-500 text-sm mt-1">{errors.category}</div>
+            )}
+          </div>
+
+          <div>
+            <Select onValueChange={(value) => setFieldValue("type", value)}>
               <SelectTrigger
                 className={cn(
                   touched.type && errors.type ? "border-red-500" : ""
                 )}
               >
-                <SelectValue placeholder="Select Type" />
+                <SelectValue placeholder="Select Logo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="instagram">Instagram</SelectItem>
@@ -205,20 +277,17 @@ export default function EditMultiTask({ refetch, data }) {
               </SelectContent>
             </Select>
 
-            {touched.type && errors.type ? (
+            {touched.type && errors.type && (
               <div className="text-red-500 text-sm mt-1">{errors.type}</div>
-            ) : null}
+            )}
           </div>
 
           <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />{" "}
-                  {isEditMode ? "Updating..." : "Adding..."}
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" /> Adding...
                 </>
-              ) : isEditMode ? (
-                "Update Task"
               ) : (
                 "Add Task"
               )}
