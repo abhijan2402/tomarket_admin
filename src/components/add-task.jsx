@@ -18,7 +18,8 @@ import {
   serverTimestamp,
   getDocs,
 } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "@/lib/firebase";
 import {
   Select,
   SelectContent,
@@ -29,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
+import { Textarea } from "./ui/textarea";
 
 const fetchCategories = async () => {
   const querySnapshot = await getDocs(collection(db, "categories"));
@@ -41,11 +43,10 @@ const fetchCategories = async () => {
 
 export default function AddTask({ refetch }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [descriptionCount, setDescriptionCount] = useState(0);
+  const [imageFile, setImageFile] = useState(null);
 
-  const {
-    data: categories = [],
-   
-  } = useQuery({
+  const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: fetchCategories,
     staleTime: 300000,
@@ -73,27 +74,38 @@ export default function AddTask({ refetch }) {
     validationSchema: Yup.object({
       title: Yup.string().required("Title is required"),
       description: Yup.string().required("Description is required"),
-      reward: Yup.number().required("Reward is required"),
+      reward: Yup.number()
+        .required("Reward is required")
+        .min(0.2, "Reward must be at least 0.2"),
       link: Yup.string().url("Invalid URL").required("Link is required"),
       type: Yup.string().required("Type is required"),
-      category: Yup.string().required("category is required"),
+      category: Yup.string().required("Category is required"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
+        let platformLogo = values.type;
+
+        if (values.type === "other" && imageFile) {
+          const storageRef = ref(storage, `platformLogo/${imageFile.name}-${Date.now()}`);
+          const uploadResult = await uploadBytes(storageRef, imageFile);
+          platformLogo = await getDownloadURL(uploadResult.ref);
+        }
+
         await addDoc(collection(db, "singletasks"), {
           title: values.title,
           description: values.description,
           reward: values.reward,
           link: values.link,
-          type: 'single',
+          type: "single",
           category: values.category,
-          platformLogo: values.type,
+          platformLogo,
           createdAt: serverTimestamp(),
           createdBy: "admin",
-          status: 'pending'
+          status: "pending",
         });
 
         resetForm();
+        setImageFile(null);
         refetch();
         setIsOpen(false);
         toast.success("Task added successfully");
@@ -105,6 +117,19 @@ export default function AddTask({ refetch }) {
       }
     },
   });
+
+  const handleDescriptionChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= 500) {
+      setFieldValue("description", value);
+      setDescriptionCount(value.length);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImageFile(file);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -136,12 +161,12 @@ export default function AddTask({ refetch }) {
           </div>
 
           <div>
-            <Input
+            <Textarea
               name="description"
               type="text"
               placeholder="Description"
               value={values.description}
-              onChange={handleChange}
+              onChange={handleDescriptionChange}
               onBlur={handleBlur}
               className={cn(
                 touched.description && errors.description
@@ -149,11 +174,19 @@ export default function AddTask({ refetch }) {
                   : ""
               )}
             />
-            {touched.description && errors.description ? (
-              <div className="text-red-500 text-sm mt-1">
-                {errors.description}
+            <div className="flex justify-between">
+              {touched.description && errors.description ? (
+                <div className="text-red-500 text-sm mt-1">
+                  {errors.description}
+                </div>
+              ) : null}
+
+              <div></div>
+
+              <div className="text-sm text-gray-500 mt-1">
+                {descriptionCount}/500 characters
               </div>
-            ) : null}
+            </div>
           </div>
 
           <div>
@@ -204,8 +237,6 @@ export default function AddTask({ refetch }) {
                     {item.name}
                   </SelectItem>
                 ))}
-
-            
               </SelectContent>
             </Select>
 
@@ -215,7 +246,12 @@ export default function AddTask({ refetch }) {
           </div>
 
           <div>
-            <Select onValueChange={(value) => setFieldValue("type", value)}>
+            <Select
+              onValueChange={(value) => {
+                setFieldValue("type", value);
+                if (value !== "other") setImageFile(null);
+              }}
+            >
               <SelectTrigger
                 className={cn(
                   touched.type && errors.type ? "border-red-500" : ""
@@ -228,6 +264,7 @@ export default function AddTask({ refetch }) {
                 <SelectItem value="twitter">Twitter</SelectItem>
                 <SelectItem value="facebook">Facebook</SelectItem>
                 <SelectItem value="youtube">YouTube</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
 
@@ -235,6 +272,22 @@ export default function AddTask({ refetch }) {
               <div className="text-red-500 text-sm mt-1">{errors.type}</div>
             ) : null}
           </div>
+
+          {values.type === "other" && (
+            <div>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="border"
+              />
+              {imageFile && (
+                <div className="text-sm text-gray-500 mt-1">
+                  Selected: {imageFile.name}
+                </div>
+              )}
+            </div>
+          )}
 
           <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>

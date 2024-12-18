@@ -28,6 +28,8 @@ const TaskCard = ({ data, refetch }) => {
       : "/images/all.webp";
   };
 
+  console.log(data)
+
   const [approveLoader, setApproveLoader] = useState(false);
   const [rejectLoader, setRejectLoader] = useState(false);
   const [deleteLoader, setDeleteLoader] = useState(false);
