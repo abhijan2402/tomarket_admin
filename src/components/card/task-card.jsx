@@ -113,9 +113,9 @@ const TaskCard = ({ data, refetch }) => {
                       className={cn(
                         data?.status === "pending"
                           ? "bg-black"
-                          : data?.status === "approved"
-                          ? "bg-green-600"
-                          : "bg-destructive",
+                          : data?.status === "rejected"
+                          ? "bg-destructive"
+                          : "bg-green-600",
                         "absolute top-0 left-0 m-2 rounded-full px-2 text-center text-sm font-medium text-white capitalize"
                       )}
                     >
@@ -182,9 +182,9 @@ const TaskCard = ({ data, refetch }) => {
               className={cn(
                 data?.status === "pending"
                   ? "bg-black"
-                  : data?.status === "approved"
-                  ? "bg-green-600"
-                  : "bg-destructive",
+                  : data?.status === "rejected"
+                  ? "bg-destructive"
+                  : "bg-green-600",
                 "absolute top-0 left-0 m-2 rounded-full px-2 text-center text-sm font-medium text-white capitalize"
               )}
             >

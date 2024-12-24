@@ -59,12 +59,16 @@ export default function SingleTask() {
   const {
     data: tasks = [],
     isLoading,
+    error,
     refetch,
   } = useQuery({
     queryKey: ["singletasks"],
     queryFn: fetchTasks,
     staleTime: 300000,
   });
+
+  console.log(error);
+  console.log(tasks);
 
   const filteredTasks = useMemo(() => {
     if (value === 0) {
@@ -73,6 +77,10 @@ export default function SingleTask() {
       return tasks.filter((task) => task.status === "approved");
     } else if (value === 2) {
       return tasks.filter((task) => task.status === "rejected");
+    } else if (value === 3) {
+      return tasks.filter((task) => task.status === "completed");
+    } else if (value === 4) {
+      return tasks.filter((task) => task.status === "claimAward");
     }
     return tasks;
   }, [tasks, value]);
@@ -142,6 +150,18 @@ export default function SingleTask() {
             label="Rejected"
             {...a11yProps(3)}
           />
+
+          <Tab
+            sx={{ color: theme === "dark" ? "white" : "" }}
+            label="completed"
+            {...a11yProps(4)}
+          />
+
+          <Tab
+            sx={{ color: theme === "dark" ? "white" : "" }}
+            label="claimAward"
+            {...a11yProps(5)}
+          />
         </Tabs>
       </Box>
 
@@ -155,6 +175,12 @@ export default function SingleTask() {
         {renderTasks(refetch)}
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
+        {renderTasks(refetch)}
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={3}>
+        {renderTasks(refetch)}
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={4}>
         {renderTasks(refetch)}
       </CustomTabPanel>
     </main>
