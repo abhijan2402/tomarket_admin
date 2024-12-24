@@ -49,29 +49,70 @@ const LogoUploadForm = () => {
     }
   };
 
+  // const handleUpload = async () => {
+  //   if (!logo) {
+  //     alert("Please select a logo image to upload.");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   try {
+  //     if (currentLogoURL) {
+  //       const oldLogoRef = ref(storage, currentLogoURL);
+  //       await deleteObject(oldLogoRef);
+  //     }
+
+  //     const logoRef = ref(storage, `logos/${logo.name}`);
+
+  //     await uploadBytes(logoRef, logo);
+
+  //     const downloadURL = await getDownloadURL(logoRef);
+  //     const logoDocRef = doc(db, "settings", "LOGO");
+  //     await setDoc(logoDocRef, { type: "LOGO", value: downloadURL });
+
+  //     setCurrentLogoURL(downloadURL);
+  //     setPrevLogo(true)
+  //     setLogo(null);
+  //     setLogoPreview(null);
+  //     toast.success("Logo uploaded successfully!");
+  //   } catch (error) {
+  //     console.error("Error uploading logo:", error);
+  //     toast.error("Failed to upload logo. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleUpload = async () => {
     if (!logo) {
       alert("Please select a logo image to upload.");
       return;
     }
-
+  
     setLoading(true);
     try {
       if (currentLogoURL) {
-        const oldLogoRef = ref(storage, currentLogoURL);
-        await deleteObject(oldLogoRef);
+        const oldLogoRef = ref(storage, new URL(currentLogoURL).pathname.substring(1));
+        try {
+          await deleteObject(oldLogoRef);
+        } catch (error) {
+          if (error.code === "storage/object-not-found") {
+            console.warn("No previous logo found to delete.");
+          } else {
+            throw error;
+          }
+        }
       }
-
+  
       const logoRef = ref(storage, `logos/${logo.name}`);
-
       await uploadBytes(logoRef, logo);
-
       const downloadURL = await getDownloadURL(logoRef);
+  
       const logoDocRef = doc(db, "settings", "LOGO");
       await setDoc(logoDocRef, { type: "LOGO", value: downloadURL });
-
+  
       setCurrentLogoURL(downloadURL);
-      setPrevLogo(true)
+      setPrevLogo(true);
       setLogo(null);
       setLogoPreview(null);
       toast.success("Logo uploaded successfully!");
