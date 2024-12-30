@@ -14,21 +14,23 @@ import {
   CarouselPrevious,
 } from "../ui/carousel";
 import EditGroupTask from "../edit-group-task";
+import { useAuth } from "@/context/AuthContext";
+import Details from "../Details";
 
 const TaskCard = ({ data, refetch }) => {
+  const { user } = useAuth();
   const getImage = (type) => {
-    return type === "twitter"
+    console.log(type);
+    return type.toLowerCase() === "twitter"
       ? "/images/twitter.jpg"
-      : type === "youtube"
+      : type.toLowerCase() === "youtube"
       ? "/images/youtube.jpg"
-      : type === "instagram"
+      : type.toLowerCase() === "instagram"
       ? "/images/insta.avif"
-      : type === "facebook"
+      : type.toLowerCase() === "facebook"
       ? "/images/Facebook.jpg"
-      : "/images/all.webp";
+      : type;
   };
-
-  console.log(data)
 
   const [approveLoader, setApproveLoader] = useState(false);
   const [rejectLoader, setRejectLoader] = useState(false);
@@ -95,6 +97,7 @@ const TaskCard = ({ data, refetch }) => {
     }
   };
 
+
   return (
     <Card>
       {data?.tasks?.length ? (
@@ -106,7 +109,7 @@ const TaskCard = ({ data, refetch }) => {
                   <div className="relative mx-3 mt-3 flex   h-40 overflow-hidden rounded-xl">
                     <img
                       className="object-cover w-full"
-                      src={getImage(item?.type)}
+                      src={data.thumbnail || getImage(data?.platformLogo)}
                       alt="product image"
                     />
                     <span
@@ -126,26 +129,29 @@ const TaskCard = ({ data, refetch }) => {
                   <div className="px-5 mt-2 flex justify-between items-center">
                     <div>
                       <span className="text-xs text-blue-800 font-bold  bg-gray-200 px-2 py-1 ">
-                        {item?.category}
+                        {item?.category || "Group"}
                       </span>
                     </div>
-                    <div className="top-0 right-0 flex gap-2">
-                      <EditGroupTask data={data} refetch={refetch} />
 
-                      <Button
-                        disabled={deleteLoader}
-                        size="icon"
-                        className="shadow-sm rounded-full"
-                        variant="destructive"
-                        onClick={() => handleDelete(data?.id, "tasks")}
-                      >
-                        {deleteLoader ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Trash className="w-4 h-4" />
-                        )}
-                      </Button>
-                    </div>
+                    {user.id === data?.createdBy && (
+                      <div className="top-0 right-0 flex gap-2">
+                        <EditGroupTask data={data} refetch={refetch} />
+
+                        <Button
+                          disabled={deleteLoader}
+                          size="icon"
+                          className="shadow-sm rounded-full"
+                          variant="destructive"
+                          onClick={() => handleDelete(data?.id, "tasks")}
+                        >
+                          {deleteLoader ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-1 px-5 ">
@@ -175,7 +181,7 @@ const TaskCard = ({ data, refetch }) => {
           >
             <img
               className="object-cover w-full"
-              src={getImage(data?.type)}
+              src={getImage(data?.platformLogo)}
               alt="product image"
             />
             <span
@@ -193,27 +199,33 @@ const TaskCard = ({ data, refetch }) => {
           </a>
 
           <div className="px-5 mt-2 flex justify-between items-center">
-            <div>
-              <span className="text-xs text-blue-800 font-bold  bg-gray-200 px-2 py-1 ">
-                {data?.category}
-              </span>
-            </div>
+            {data?.category ? (
+              <div>
+                <span className="text-xs text-blue-800 font-bold  bg-gray-200 px-2 py-1 ">
+                  {data?.category}
+                </span>
+              </div>
+            ) : (
+              <div></div>
+            )}
 
-            <div className="flex gap-2">
-              <EditTask data={data} refetch={refetch} />
+            {user.id === data?.createdBy && (
+              <div className="flex gap-2">
+                <EditTask data={data} refetch={refetch} />
 
-              <Button
-                size="icon"
-                className="shadow-sm rounded-full"
-                variant="destructive"
-                onClick={() => handleDelete(data?.id, "singletasks")}
-              >
-                <Trash className="w-4 h-4" />
-              </Button>
-            </div>
+                <Button
+                  size="icon"
+                  className="shadow-sm rounded-full"
+                  variant="destructive"
+                  onClick={() => handleDelete(data?.id, "singletasks")}
+                >
+                  <Trash className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </div>
 
-          <div className="mt-1 px-5 ">
+          <div className="mt-1 mb-4 px-5 ">
             <a href="#">
               <h5 className="text-xl font-medium tracking-tight text-slate-900 dark:text-slate-100 truncate">
                 {data?.title}
@@ -224,6 +236,8 @@ const TaskCard = ({ data, refetch }) => {
                 {data?.description}
               </p>
             </div>
+
+            {user.id === data?.createdBy && <Details data={data} refetch={refetch} />}
           </div>
         </>
       )}

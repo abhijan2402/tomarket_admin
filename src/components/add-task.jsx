@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Textarea } from "./ui/textarea";
+import { useAuth } from "@/context/AuthContext";
 
 const fetchCategories = async () => {
   const querySnapshot = await getDocs(collection(db, "categories"));
@@ -45,6 +46,7 @@ export default function AddTask({ refetch }) {
   const [isOpen, setIsOpen] = useState(false);
   const [descriptionCount, setDescriptionCount] = useState(0);
   const [imageFile, setImageFile] = useState(null);
+  const { user } = useAuth();
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -69,6 +71,7 @@ export default function AddTask({ refetch }) {
       reward: "",
       link: "",
       type: "",
+      proof: "no",
       category: "",
     },
     validationSchema: Yup.object({
@@ -78,6 +81,7 @@ export default function AddTask({ refetch }) {
         .required("Reward is required")
         .min(0.2, "Reward must be at least 0.2"),
       link: Yup.string().url("Invalid URL").required("Link is required"),
+      proof: Yup.string().required("Proof is required"),
       type: Yup.string().required("Type is required"),
       category: Yup.string().required("Category is required"),
     }),
@@ -86,7 +90,10 @@ export default function AddTask({ refetch }) {
         let platformLogo = values.type;
 
         if (values.type === "other" && imageFile) {
-          const storageRef = ref(storage, `platformLogo/${imageFile.name}-${Date.now()}`);
+          const storageRef = ref(
+            storage,
+            `platformLogo/${imageFile.name}-${Date.now()}`
+          );
           const uploadResult = await uploadBytes(storageRef, imageFile);
           platformLogo = await getDownloadURL(uploadResult.ref);
         }
@@ -100,11 +107,15 @@ export default function AddTask({ refetch }) {
           category: values.category,
           platformLogo,
           createdAt: serverTimestamp(),
-          createdBy: "admin",
-          status: "pending",
+          createdBy: user?.id,
+          status: "approved",
+          proof: values.proof,
         });
 
         resetForm();
+        setFieldValue("type", "");
+        setFieldValue("category", "");
+        setFieldValue("proof", "no");
         setImageFile(null);
         refetch();
         setIsOpen(false);
@@ -223,7 +234,10 @@ export default function AddTask({ refetch }) {
           </div>
 
           <div>
-            <Select onValueChange={(value) => setFieldValue("category", value)}>
+            <Select
+              value={values.category}
+              onValueChange={(value) => setFieldValue("category", value)}
+            >
               <SelectTrigger
                 className={cn(
                   touched.category && errors.category ? "border-red-500" : ""
@@ -247,6 +261,7 @@ export default function AddTask({ refetch }) {
 
           <div>
             <Select
+              value={values.type}
               onValueChange={(value) => {
                 setFieldValue("type", value);
                 if (value !== "other") setImageFile(null);
@@ -288,6 +303,32 @@ export default function AddTask({ refetch }) {
               )}
             </div>
           )}
+
+          <div>
+            <Select
+              value={values.proof}
+              onValueChange={(value) => {
+                setFieldValue("proof", value);
+              }}
+            >
+              <SelectTrigger
+                className={cn(
+                  touched.proof && errors.proof ? "border-red-500" : ""
+                )}
+              >
+                <SelectValue placeholder="Select Proof" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no">No</SelectItem>
+                <SelectItem value="screenshot">Screenshot</SelectItem>
+                <SelectItem value="link">Link</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {touched.proof && errors.proof ? (
+              <div className="text-red-500 text-sm mt-1">{errors.proof}</div>
+            ) : null}
+          </div>
 
           <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>

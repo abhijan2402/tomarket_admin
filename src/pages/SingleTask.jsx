@@ -8,6 +8,7 @@ import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTheme } from "@/components/theme-provider";
 import AddTask from "@/components/add-task";
+import { useAuth } from "@/context/AuthContext";
 
 const fetchTasks = async () => {
   const querySnapshot = await getDocs(collection(db, "singletasks"));
@@ -46,6 +47,7 @@ function a11yProps(index) {
 export default function SingleTask() {
   const [searchParams, setSearchParams] = useSearchParams();
   const defaultTab = parseInt(searchParams.get("tab") || "0", 10);
+  const { user } = useAuth();
 
   const { theme } = useTheme();
 
@@ -67,20 +69,21 @@ export default function SingleTask() {
     staleTime: 300000,
   });
 
-  console.log(error);
-  console.log(tasks);
-
   const filteredTasks = useMemo(() => {
     if (value === 0) {
-      return tasks.filter((task) => task.status === "pending");
+      return tasks.filter((task) => task.createdBy === user?.id);
     } else if (value === 1) {
-      return tasks.filter((task) => task.status === "approved");
+      return tasks.filter(
+        (task) => task.status === "pending" && task.createdBy !== user?.id
+      );
     } else if (value === 2) {
-      return tasks.filter((task) => task.status === "rejected");
+      return tasks.filter(
+        (task) => task.status === "approved" && task.createdBy !== user?.id
+      );
     } else if (value === 3) {
-      return tasks.filter((task) => task.status === "completed");
-    } else if (value === 4) {
-      return tasks.filter((task) => task.status === "claimAward");
+      return tasks.filter(
+        (task) => task.status === "rejected" && task.createdBy !== user?.id
+      );
     }
     return tasks;
   }, [tasks, value]);
@@ -130,11 +133,11 @@ export default function SingleTask() {
           onChange={handleChange}
           aria-label="task status tabs"
         >
-          {/* <Tab
+          <Tab
             sx={{ color: theme === "dark" ? "white" : "" }}
-            label="All"
+            label="My Task"
             {...a11yProps(0)}
-          /> */}
+          />
           <Tab
             sx={{ color: theme === "dark" ? "white" : "" }}
             label="Pending"
@@ -150,24 +153,9 @@ export default function SingleTask() {
             label="Rejected"
             {...a11yProps(3)}
           />
-
-          <Tab
-            sx={{ color: theme === "dark" ? "white" : "" }}
-            label="completed"
-            {...a11yProps(4)}
-          />
-
-          <Tab
-            sx={{ color: theme === "dark" ? "white" : "" }}
-            label="claimAward"
-            {...a11yProps(5)}
-          />
         </Tabs>
       </Box>
 
-      {/* <CustomTabPanel value={value} index={0}>
-        {renderTasks(refetch)}
-      </CustomTabPanel> */}
       <CustomTabPanel value={value} index={0}>
         {renderTasks(refetch)}
       </CustomTabPanel>
@@ -177,10 +165,8 @@ export default function SingleTask() {
       <CustomTabPanel value={value} index={2}>
         {renderTasks(refetch)}
       </CustomTabPanel>
+
       <CustomTabPanel value={value} index={3}>
-        {renderTasks(refetch)}
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={4}>
         {renderTasks(refetch)}
       </CustomTabPanel>
     </main>

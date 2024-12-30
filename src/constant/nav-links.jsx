@@ -7,7 +7,7 @@ export const NAV_LINKS = [
     path: "/dashboard",
   },
   {
-    label: "Multi Task",
+    label: "Group Task",
     icon: () => <ClipboardList className="h-4 w-4" />,
     path: "/dashboard/multi-task",
   },

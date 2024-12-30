@@ -19,11 +19,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { db, storage } from "@/lib/firebase"; // Add storage import for Firebase Storage
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage"; // Firebase Storage functions
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Firebase Storage functions
 import {
   Select,
   SelectContent,
@@ -35,15 +31,7 @@ import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Textarea } from "./ui/textarea";
-
-const fetchCategories = async () => {
-  const querySnapshot = await getDocs(collection(db, "categories"));
-  const categories = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  return categories.sort((a, b) => a.position - b.position);
-};
+import { useAuth } from "@/context/AuthContext";
 
 export default function AddGroupTask({ refetch }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,12 +39,7 @@ export default function AddGroupTask({ refetch }) {
   const [loading, setLoading] = useState(false);
   const [descriptionCount, setDescriptionCount] = useState(0);
   const [imageFile, setImageFile] = useState(null);
-
-  const { data: categories = [] } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchCategories,
-    staleTime: 300000,
-  });
+  const { user } = useAuth();
 
   const {
     values,
@@ -75,7 +58,6 @@ export default function AddGroupTask({ refetch }) {
       reward: "",
       link: "",
       type: "",
-      category: "",
     },
     validationSchema: Yup.object({
       title: Yup.string().required("Title is required"),
@@ -85,7 +67,6 @@ export default function AddGroupTask({ refetch }) {
         .min(0.2, "Reward must be at least 0.2"),
       link: Yup.string().url("Invalid URL").required("Link is required"),
       type: Yup.string().required("Type is required"),
-      category: Yup.string().required("Category is required"),
     }),
     onSubmit: async (values) => {
       let platformLogo = values.type;
@@ -113,7 +94,6 @@ export default function AddGroupTask({ refetch }) {
           description: values.description,
           reward: values.reward,
           link: values.link,
-          category: values.category,
           platformLogo,
         },
       ]);
@@ -121,7 +101,6 @@ export default function AddGroupTask({ refetch }) {
       resetForm();
       setDescriptionCount(0);
       setFieldValue("type", "");
-      setFieldValue("category", "");
       setImageFile(null);
     },
   });
@@ -132,7 +111,7 @@ export default function AddGroupTask({ refetch }) {
       await addDoc(collection(db, "tasks"), {
         tasks,
         createdAt: serverTimestamp(),
-        createdBy: "admin",
+        createdBy: user.uid,
         status: "pending",
       });
 
@@ -294,35 +273,13 @@ export default function AddGroupTask({ refetch }) {
             )}
           </div>
 
-          {/* Category Select */}
-          <div>
-            <Select onValueChange={(value) => setFieldValue("category", value)}>
-              <SelectTrigger
-                className={cn(
-                  touched.category && errors.category ? "border-red-500" : ""
-                )}
-              >
-                <SelectValue placeholder="Select Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((item) => (
-                  <SelectItem key={item.id} value={item.name}>
-                    {item.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {touched.category && errors.category && (
-              <div className="text-red-500 text-sm mt-1">{errors.category}</div>
-            )}
-          </div>
-
           {/* Type Select */}
           <div>
             <Select onValueChange={(value) => setFieldValue("type", value)}>
               <SelectTrigger
-                className={cn(touched.type && errors.type ? "border-red-500" : "")}
+                className={cn(
+                  touched.type && errors.type ? "border-red-500" : ""
+                )}
               >
                 <SelectValue placeholder="Select Type" />
               </SelectTrigger>
@@ -347,7 +304,11 @@ export default function AddGroupTask({ refetch }) {
               <label className="block text-sm font-medium text-gray-700">
                 Upload Platform Logo
               </label>
-              <Input type="file" accept="image/*" onChange={handleImageChange} />
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
             </div>
           )}
 
@@ -363,7 +324,8 @@ export default function AddGroupTask({ refetch }) {
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                  Submitting...
                 </>
               ) : (
                 "Submit"

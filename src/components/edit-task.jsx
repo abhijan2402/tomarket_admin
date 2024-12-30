@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useFormik } from "formik";
 import { Edit, Loader2, Trash } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import {
   collection,
@@ -31,7 +31,7 @@ import {
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
-
+import { Textarea } from "./ui/textarea";
 
 const fetchCategories = async () => {
   const querySnapshot = await getDocs(collection(db, "categories"));
@@ -45,11 +45,9 @@ const fetchCategories = async () => {
 export default function EditTask({ refetch, data }) {
   const [isOpen, setIsOpen] = useState(false);
   const isEditMode = !!data?.id;
+  const [descriptionCount, setDescriptionCount] = useState(0);
 
-  const {
-    data: categories = [],
-   
-  } = useQuery({
+  const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: fetchCategories,
     staleTime: 300000,
@@ -73,6 +71,7 @@ export default function EditTask({ refetch, data }) {
       link: data?.link || "",
       type: data?.platformLogo || "",
       category: data?.category || "",
+      proof: data.proof || "no",
     },
     validationSchema: Yup.object({
       title: Yup.string().required("Title is required"),
@@ -109,6 +108,20 @@ export default function EditTask({ refetch, data }) {
     },
   });
 
+  const handleDescriptionChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= 500) {
+      setFieldValue("description", value);
+      
+    }
+  };
+
+  useEffect(() => {
+if(values.description) {
+  setDescriptionCount(values.description.length);
+}
+  }, [values.description])
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -143,12 +156,12 @@ export default function EditTask({ refetch, data }) {
           </div>
 
           <div>
-            <Input
+            <Textarea
               name="description"
               type="text"
               placeholder="Description"
               value={values.description}
-              onChange={handleChange}
+              onChange={handleDescriptionChange}
               onBlur={handleBlur}
               className={cn(
                 touched.description && errors.description
@@ -156,11 +169,19 @@ export default function EditTask({ refetch, data }) {
                   : ""
               )}
             />
-            {touched.description && errors.description ? (
-              <div className="text-red-500 text-sm mt-1">
-                {errors.description}
+            <div className="flex justify-between">
+              {touched.description && errors.description ? (
+                <div className="text-red-500 text-sm mt-1">
+                  {errors.description}
+                </div>
+              ) : null}
+
+              <div></div>
+
+              <div className="text-sm text-gray-500 mt-1">
+                {descriptionCount}/500 characters
               </div>
-            ) : null}
+            </div>
           </div>
 
           <div>
@@ -211,8 +232,6 @@ export default function EditTask({ refetch, data }) {
                     {item.name}
                   </SelectItem>
                 ))}
-
-            
               </SelectContent>
             </Select>
 
@@ -243,6 +262,32 @@ export default function EditTask({ refetch, data }) {
 
             {touched.type && errors.type ? (
               <div className="text-red-500 text-sm mt-1">{errors.type}</div>
+            ) : null}
+          </div>
+
+          <div>
+            <Select
+              value={values.proof}
+              onValueChange={(value) => {
+                setFieldValue("proof", value);
+              }}
+            >
+              <SelectTrigger
+                className={cn(
+                  touched.proof && errors.proof ? "border-red-500" : ""
+                )}
+              >
+                <SelectValue placeholder="Select Proof" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no">No</SelectItem>
+                <SelectItem value="screenshot">Screenshot</SelectItem>
+                <SelectItem value="link">Link</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {touched.proof && errors.proof ? (
+              <div className="text-red-500 text-sm mt-1">{errors.proof}</div>
             ) : null}
           </div>
 
