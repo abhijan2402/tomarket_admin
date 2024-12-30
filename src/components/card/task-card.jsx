@@ -21,13 +21,13 @@ const TaskCard = ({ data, refetch }) => {
   const { user } = useAuth();
   const getImage = (type) => {
     console.log(type);
-    return type.toLowerCase() === "twitter"
+    return type?.toLowerCase() === "twitter"
       ? "/images/twitter.jpg"
-      : type.toLowerCase() === "youtube"
+      : type?.toLowerCase() === "youtube"
       ? "/images/youtube.jpg"
-      : type.toLowerCase() === "instagram"
+      : type?.toLowerCase() === "instagram"
       ? "/images/insta.avif"
-      : type.toLowerCase() === "facebook"
+      : type?.toLowerCase() === "facebook"
       ? "/images/Facebook.jpg"
       : type;
   };
@@ -97,7 +97,6 @@ const TaskCard = ({ data, refetch }) => {
     }
   };
 
-
   return (
     <Card>
       {data?.tasks?.length ? (
@@ -109,7 +108,7 @@ const TaskCard = ({ data, refetch }) => {
                   <div className="relative mx-3 mt-3 flex   h-40 overflow-hidden rounded-xl">
                     <img
                       className="object-cover w-full"
-                      src={data.thumbnail || getImage(data?.platformLogo)}
+                      src={data.thumbnail ||"/images/all.webp"}
                       alt="product image"
                     />
                     <span
@@ -181,7 +180,9 @@ const TaskCard = ({ data, refetch }) => {
           >
             <img
               className="object-cover w-full"
-              src={getImage(data?.platformLogo)}
+              src={
+                getImage(data?.platformLogo)
+              }
               alt="product image"
             />
             <span
@@ -237,7 +238,9 @@ const TaskCard = ({ data, refetch }) => {
               </p>
             </div>
 
-            {user.id === data?.createdBy && <Details data={data} refetch={refetch} />}
+            {user.id === data?.createdBy && (
+              <Details data={data} refetch={refetch} />
+            )}
           </div>
         </>
       )}

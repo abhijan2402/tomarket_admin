@@ -12,11 +12,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import toast from "react-hot-toast";
+import { doc, getDoc } from "firebase/firestore";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   // Formik form handling
   const formik = useFormik({
@@ -39,6 +42,24 @@ export default function Login() {
           values.email,
           values.password
         );
+
+        const userDoc = await getDoc(
+          doc(db, "users", userCredential?.user?.uid)
+        );
+        const userData = userDoc.data();
+
+        console.log(userData.role)
+        if (!userData) {
+          logout();
+          return setErrors({ firebase: "Failed to log in. Please try again." });;
+        }
+
+        if (userData.role !== "super-admin" && userData.role !== "admin") {
+          logout();
+          return setErrors({ firebase: "Failed to log in. Please try again." });;
+        }
+
+        console.log(userCredential);
         toast.success("Logged in successfully");
       } catch (error) {
         console.error("Error logging in:", error);

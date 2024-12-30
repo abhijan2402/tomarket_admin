@@ -48,7 +48,7 @@ export default function SingleTask() {
   const [searchParams, setSearchParams] = useSearchParams();
   const defaultTab = parseInt(searchParams.get("tab") || "0", 10);
   const { user } = useAuth();
-
+console.log(user)
   const { theme } = useTheme();
 
   const [value, setValue] = useState(defaultTab);

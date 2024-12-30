@@ -2,6 +2,7 @@ import { auth, db } from "@/lib/firebase";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export const AuthContext = createContext();
 
@@ -9,16 +10,25 @@ export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-
   const getUser = async () => {
     try {
       setLoading(true);
-      
+
       onAuthStateChanged(auth, async (currentUser) => {
         if (currentUser) {
           const userDoc = await getDoc(doc(db, "users", currentUser.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
+
+            if (!userData) {
+              logout();
+              return toast.error("Invalid Credentials");
+            }
+
+            if (userData.role !== "super-admin" && userData.role !== "admin") {
+              logout();
+              return toast.error("Invalid Credentials");
+            }
 
             setUser({
               email: currentUser?.email,
