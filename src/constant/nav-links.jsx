@@ -41,9 +41,9 @@ export const NAV_LINKS = [
     icon: () => <Table className="h-4 w-4" />,
     path: "/dashboard/category",
   },
-  {
-    label: "Advertisement",
-    icon: () => <Megaphone className="h-4 w-4" />,
-    path: "/dashboard/advertisement",
-  },
+  // {
+  //   label: "Advertisement",
+  //   icon: () => <Megaphone className="h-4 w-4" />,
+  //   path: "/dashboard/advertisement",
+  // },
 ];

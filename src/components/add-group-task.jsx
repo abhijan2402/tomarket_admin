@@ -111,8 +111,8 @@ export default function AddGroupTask({ refetch }) {
       await addDoc(collection(db, "tasks"), {
         tasks,
         createdAt: serverTimestamp(),
-        createdBy: user.uid,
-        status: "pending",
+        createdBy: user.id,
+        status: "approved",
       });
 
       setTasks([]);
@@ -275,7 +275,7 @@ export default function AddGroupTask({ refetch }) {
 
           {/* Type Select */}
           <div>
-            <Select onValueChange={(value) => setFieldValue("type", value)}>
+            <Select value={values.type} onValueChange={(value) => setFieldValue("type", value)}>
               <SelectTrigger
                 className={cn(
                   touched.type && errors.type ? "border-red-500" : ""

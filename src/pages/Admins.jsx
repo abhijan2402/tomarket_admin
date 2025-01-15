@@ -141,13 +141,16 @@ export default function Admins() {
                     </Badge>
                   </TableCell>
                   <TableCell className="flex gap-3 justify-end">
-                    <Button
+                    {
+                      user.role === 'super-admin' && admin.role !== 'super-admin' ? <Button
                       variant="outlined"
                       onClick={() => handleToggleActiveStatus(admin)}
                       disabled={loading}
                     >
                       {admin.isActive ? "Deactivate" : "Activate"}
-                    </Button>
+                    </Button>: null
+                    }
+                    
                   </TableCell>
                 </TableRow>
               ))}

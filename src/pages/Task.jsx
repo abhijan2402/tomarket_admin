@@ -8,6 +8,7 @@ import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTheme } from "@/components/theme-provider";
 import AddGroupTask from "@/components/add-group-task";
+import { useAuth } from "@/context/AuthContext";
 
 const fetchTasks = async () => {
   const querySnapshot = await getDocs(collection(db, "tasks"));
@@ -44,6 +45,7 @@ function a11yProps(index) {
 }
 
 export default function Task() {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const defaultTab = parseInt(searchParams.get("tab") || "0", 10);
 
@@ -68,11 +70,14 @@ export default function Task() {
 
   const filteredTasks = useMemo(() => {
     if (value === 0) {
-      return tasks.filter((task) => task.status === "pending");
-    } else if (value === 1) {
-      return tasks.filter((task) => task.status === "approved");
+      return tasks.filter((task) => task.createdBy === user?.id);
+    }
+    else if (value === 1) {
+      return tasks.filter((task) => task.status === "pending" && task.createdBy !== user?.id);
     } else if (value === 2) {
-      return tasks.filter((task) => task.status === "rejected");
+      return tasks.filter((task) => task.status === "approved" && task.createdBy !== user?.id);
+    } else if (value === 3) {
+      return tasks.filter((task) => task.status === "rejected" && task.createdBy !== user?.id);
     }
 
     return tasks;
@@ -124,11 +129,11 @@ export default function Task() {
           onChange={handleChange}
           aria-label="task status tabs"
         >
-          {/* <Tab
+          <Tab
             sx={{ color: theme === "dark" ? "white" : "" }}
-            label="All"
+            label="My Task"
             {...a11yProps(0)}
-          /> */}
+          />
           <Tab
             sx={{ color: theme === "dark" ? "white" : "" }}
             label="Pending"
