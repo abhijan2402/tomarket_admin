@@ -1,4 +1,19 @@
-import { Aperture, CalendarCheck, ClipboardList, Home, LayoutDashboard, Megaphone, Table, User, User2, Users, Users2 } from "lucide-react";
+import {
+  Aperture,
+  CalendarCheck,
+  ClipboardList,
+  Home,
+  LayoutDashboard,
+  MailQuestion,
+  Megaphone,
+  Settings,
+  Settings2,
+  Table,
+  User,
+  User2,
+  Users,
+  Users2,
+} from "lucide-react";
 
 export const NAV_LINKS = [
   {
@@ -37,10 +52,28 @@ export const NAV_LINKS = [
     path: "/dashboard/logo-management",
   },
   {
+    label: "Support Query",
+    icon: () => <MailQuestion className="h-4 w-4" />,
+    path: "/dashboard/support-query",
+  },
+  {
+    label: "Support Settings",
+    icon: () => <Settings2 className="h-4 w-4" />,
+    path: "/dashboard/support-settings",
+  },
+
+  {
     label: "Category",
     icon: () => <Table className="h-4 w-4" />,
     path: "/dashboard/category",
   },
+
+  {
+    label: "Settings",
+    icon: () => <Settings className="h-4 w-4" />,
+    path: "/dashboard/settings",
+  },
+
   // {
   //   label: "Advertisement",
   //   icon: () => <Megaphone className="h-4 w-4" />,

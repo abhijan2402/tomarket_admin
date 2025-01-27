@@ -96,9 +96,7 @@ const Navbar = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {/* <DropdownMenuItem>Settings</DropdownMenuItem> */}
-          {/* <DropdownMenuItem>Support</DropdownMenuItem> */}
+       
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
         </DropdownMenuContent>

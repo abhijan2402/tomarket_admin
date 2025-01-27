@@ -14,6 +14,9 @@ import SingleTask from "./pages/SingleTask";
 import HomeLayout from "./pages/HomeLayout";
 import Admins from "./pages/Admins";
 import Users from "./pages/Users";
+import Settings from "./pages/Settings";
+import SupportSettings from "./pages/SupportSettings";
+import SupportQuery from "./pages/SupportQuery";
 
 const App = () => {
   return (
@@ -37,6 +40,9 @@ const App = () => {
           <Route path="admins" element={<Admins />} />
           <Route path="users" element={<Users />} />
           <Route path="category" element={<Category />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="support-settings" element={<SupportSettings />} />
+          <Route path="support-query" element={<SupportQuery />} />
         </Route>
 
         <Route
