@@ -10,6 +10,7 @@ import { useTheme } from "@/components/theme-provider";
 import AddGroupTask from "@/components/add-group-task";
 import { useAuth } from "@/context/AuthContext";
 
+
 const fetchTasks = async () => {
   const querySnapshot = await getDocs(collection(db, "tasks"));
   const items = [];
@@ -154,9 +155,7 @@ export default function Task() {
         </Tabs>
       </Box>
 
-      {/* <CustomTabPanel value={value} index={0}>
-        {renderTasks(refetch)}
-      </CustomTabPanel> */}
+     
       <CustomTabPanel value={value} index={0}>
         {renderTasks(refetch)}
       </CustomTabPanel>

@@ -68,7 +68,7 @@ const SupportQuery = () => {
       {/* Display Existing Queries */}
       <Card className="w-full overflow-auto">
         <CardContent className="pt-5">
-          <div className="overflow-x-auto max-h-96 max-w-[400px] md`:max-w-full">
+          <div className="overflow-x-auto max-h-96 max-w-[400px] md:max-w-full">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -76,7 +76,9 @@ const SupportQuery = () => {
                   <TableHead className="min-w-[250px]">Description</TableHead>
                   <TableHead className="min-w-[150px]">User</TableHead>
                   <TableHead className="min-w-[100px]">Status</TableHead>
-                  <TableHead className="text-right min-w-[100px]">Action</TableHead>
+                  <TableHead className="text-right min-w-[100px]">
+                    Action
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

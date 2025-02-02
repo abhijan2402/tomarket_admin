@@ -26,7 +26,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 import { db } from "@/lib/firebase";
 
-export default function Details({ data, refetch }) {
+export default function Details({ data, refetch, dbname, id }) {
   const [approvedLoading, setApprovedLoading] = React.useState({});
   const [rejectedLoading, setRejectedLoading] = React.useState({});
   const approveProof = async (index) => {

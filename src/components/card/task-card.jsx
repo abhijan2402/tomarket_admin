@@ -108,7 +108,7 @@ const TaskCard = ({ data, refetch }) => {
                   <div className="relative mx-3 mt-3 flex   h-40 overflow-hidden rounded-xl">
                     <img
                       className="object-cover w-full"
-                      src={data.thumbnail ||"/images/all.webp"}
+                      src={data.thumbnail || "/images/all.webp"}
                       alt="product image"
                     />
                     <span
@@ -132,28 +132,26 @@ const TaskCard = ({ data, refetch }) => {
                       </span>
                     </div>
 
-                    {user.id === data?.createdBy && (
-                      <div className="top-0 right-0 flex gap-2">
-                        <EditGroupTask data={data} refetch={refetch} />
+                    <div className="top-0 right-0 flex gap-2">
+                      <EditGroupTask data={data} refetch={refetch} />
 
-                        <Button
-                          disabled={deleteLoader}
-                          size="icon"
-                          className="shadow-sm rounded-full"
-                          variant="destructive"
-                          onClick={() => handleDelete(data?.id, "tasks")}
-                        >
-                          {deleteLoader ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Trash className="w-4 h-4" />
-                          )}
-                        </Button>
-                      </div>
-                    )}
+                      <Button
+                        disabled={deleteLoader}
+                        size="icon"
+                        className="shadow-sm rounded-full"
+                        variant="destructive"
+                        onClick={() => handleDelete(data?.id, "tasks")}
+                      >
+                        {deleteLoader ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
 
-                  <div className="mt-1 px-5 ">
+                  <div className="mt-1 px-5 pb-5">
                     <a href="#">
                       <h5 className="text-xl font-medium tracking-tight text-slate-900 dark:text-slate-100 truncate">
                         {item?.title}
@@ -161,9 +159,13 @@ const TaskCard = ({ data, refetch }) => {
                     </a>
                     <div className="mt-2 mb-5 flex items-center justify-between">
                       <p className="text-sm tracking-tight text-slate-600 dark:text-slate-300 truncate">
-                        {item?.description}
+                        {item?.description || data.description}
                       </p>
                     </div>
+
+                    {user.id === data?.createdBy && (
+                      <Details dbname="tasks" id={data.id} data={item} refetch={refetch} />
+                    )}
                   </div>
                 </div>
               </CarouselItem>
@@ -180,9 +182,7 @@ const TaskCard = ({ data, refetch }) => {
           >
             <img
               className="object-cover w-full"
-              src={
-                getImage(data?.platformLogo)
-              }
+              src={getImage(data?.platformLogo)}
               alt="product image"
             />
             <span
@@ -210,20 +210,18 @@ const TaskCard = ({ data, refetch }) => {
               <div></div>
             )}
 
-            {user.id === data?.createdBy && (
-              <div className="flex gap-2">
-                <EditTask data={data} refetch={refetch} />
+            <div className="flex gap-2">
+              <EditTask data={data} refetch={refetch} />
 
-                <Button
-                  size="icon"
-                  className="shadow-sm rounded-full"
-                  variant="destructive"
-                  onClick={() => handleDelete(data?.id, "singletasks")}
-                >
-                  <Trash className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
+              <Button
+                size="icon"
+                className="shadow-sm rounded-full"
+                variant="destructive"
+                onClick={() => handleDelete(data?.id, "singletasks")}
+              >
+                <Trash className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="mt-1 mb-4 px-5 ">
@@ -239,7 +237,7 @@ const TaskCard = ({ data, refetch }) => {
             </div>
 
             {user.id === data?.createdBy && (
-              <Details data={data} refetch={refetch} />
+              <Details dbname="tasks" id={data.id} data={data} refetch={refetch} />
             )}
           </div>
         </>

@@ -40,6 +40,8 @@ export default function AddGroupTask({ refetch }) {
   const [descriptionCount, setDescriptionCount] = useState(0);
   const [imageFile, setImageFile] = useState(null);
   const { user } = useAuth();
+  const [description, setDescription] = useState("");
+  const [thumbnail, setThumbnail] = useState(null);
 
   const {
     values,
@@ -61,7 +63,6 @@ export default function AddGroupTask({ refetch }) {
     },
     validationSchema: Yup.object({
       title: Yup.string().required("Title is required"),
-      description: Yup.string().required("Description is required"),
       reward: Yup.number()
         .required("Reward is required")
         .min(0.2, "Reward must be at least 0.2"),
@@ -91,7 +92,6 @@ export default function AddGroupTask({ refetch }) {
         ...prev,
         {
           title: values.title,
-          description: values.description,
           reward: values.reward,
           link: values.link,
           platformLogo,
@@ -107,15 +107,36 @@ export default function AddGroupTask({ refetch }) {
 
   const handleAdd = async () => {
     try {
+      if (!description) {
+        return toast.error("Please add a description");
+      }
+
+      if (!thumbnail) {
+        return toast.error("Please add a thumbnail");
+      }
+
       setLoading(true);
+
+      const storageRef = ref(
+        storage,
+        `thumbnail/${thumbnail.name}-${Date.now()}`
+      );
+      const uploadResult = await uploadBytes(storageRef, thumbnail);
+      const thumbnailUrl = await getDownloadURL(uploadResult.ref);
+
       await addDoc(collection(db, "tasks"), {
         tasks,
         createdAt: serverTimestamp(),
         createdBy: user.id,
         status: "approved",
+        thumbnail: thumbnailUrl,
+        description,
+        type: "group",
       });
 
       setTasks([]);
+      setDescription(false)
+      setThumbnail(null)
       refetch();
       setIsOpen(false);
       toast.success("Task added successfully");
@@ -130,7 +151,7 @@ export default function AddGroupTask({ refetch }) {
   const handleDescriptionChange = (e) => {
     const value = e.target.value;
     if (value.length <= 500) {
-      setFieldValue("description", value);
+      setDescription(value);
       setDescriptionCount(value.length);
     }
   };
@@ -153,6 +174,37 @@ export default function AddGroupTask({ refetch }) {
         <DialogHeader>
           <DialogTitle>Add Group Task</DialogTitle>
         </DialogHeader>
+
+        <div>
+          <Textarea
+            name="description"
+            type="text"
+            placeholder="Description"
+            value={description}
+            onChange={handleDescriptionChange}
+            className={cn(
+              touched.description && errors.description ? "border-red-500" : ""
+            )}
+          />
+          <div className="flex justify-between">
+            <div className="text-sm text-gray-500 mt-1">
+              {descriptionCount}/500 characters
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Thumbnail
+          </label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setThumbnail(e.target.files[0])}
+            className="mt-1"
+          />
+        </div>
+        
 
         {tasks?.length ? (
           <div className="border border-primary p-2 rounded-md">
@@ -189,6 +241,8 @@ export default function AddGroupTask({ refetch }) {
           </div>
         ) : null}
 
+        <hr />
+
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           {/* Title Input */}
           <div>
@@ -209,34 +263,6 @@ export default function AddGroupTask({ refetch }) {
           </div>
 
           {/* Description Input */}
-          <div>
-            <Textarea
-              name="description"
-              type="text"
-              placeholder="Description"
-              value={values.description}
-              onChange={handleDescriptionChange}
-              onBlur={handleBlur}
-              className={cn(
-                touched.description && errors.description
-                  ? "border-red-500"
-                  : ""
-              )}
-            />
-            <div className="flex justify-between">
-              {touched.description && errors.description ? (
-                <div className="text-red-500 text-sm mt-1">
-                  {errors.description}
-                </div>
-              ) : null}
-
-              <div></div>
-
-              <div className="text-sm text-gray-500 mt-1">
-                {descriptionCount}/500 characters
-              </div>
-            </div>
-          </div>
 
           {/* Reward Input */}
           <div>
@@ -275,7 +301,10 @@ export default function AddGroupTask({ refetch }) {
 
           {/* Type Select */}
           <div>
-            <Select value={values.type} onValueChange={(value) => setFieldValue("type", value)}>
+            <Select
+              value={values.type}
+              onValueChange={(value) => setFieldValue("type", value)}
+            >
               <SelectTrigger
                 className={cn(
                   touched.type && errors.type ? "border-red-500" : ""
