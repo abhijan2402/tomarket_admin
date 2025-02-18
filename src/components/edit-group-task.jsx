@@ -51,6 +51,7 @@ export default function EditGroupTask({ refetch, data }) {
   const [description, setDescription] = useState(data?.description || "");
   const [thumbnail, setThumbnail] = useState(null);
   const [descriptionCount, setDescriptionCount] = useState(0);
+  const [numberOfParticipants, setNumberOfParticipants] = useState(data?.numberOfParticipants || 0);
   const [imageFile, setImageFile] = useState(null);
 
   const { data: categories = [] } = useQuery({
@@ -155,6 +156,7 @@ export default function EditGroupTask({ refetch, data }) {
         const thumbnailUrl = await getDownloadURL(uploadResult.ref);
         await updateDoc(taskRef, {
           thumbnail: thumbnailUrl,
+          numberOfParticipants,
           description,
           tasks,
           updatedAt: serverTimestamp(),
@@ -162,6 +164,7 @@ export default function EditGroupTask({ refetch, data }) {
       } else {
         await updateDoc(taskRef, {
           description,
+          numberOfParticipants,
           tasks,
           updatedAt: serverTimestamp(),
         });
@@ -228,6 +231,18 @@ export default function EditGroupTask({ refetch, data }) {
             </div>
           </div>
         </div>
+
+        <div>
+            <Input
+              name="numberOfParticipants"
+              type="text"
+              placeholder="numberOfParticipants"
+             
+              value={numberOfParticipants}
+              onChange={(e) => setNumberOfParticipants(e.target.value)}
+            />
+         
+          </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">

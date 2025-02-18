@@ -84,6 +84,7 @@ export default function AddTask({ refetch }) {
       proof: Yup.string().required("Proof is required"),
       type: Yup.string().required("Type is required"),
       category: Yup.string().required("Category is required"),
+      numberOfParticipants: Yup.number().required("Number of participants is required"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
@@ -110,6 +111,7 @@ export default function AddTask({ refetch }) {
           createdBy: user?.id,
           status: "approved",
           proof: values.proof,
+          numberOfParticipants: values.numberOfParticipants,
         });
 
         resetForm();
@@ -213,6 +215,22 @@ export default function AddTask({ refetch }) {
             />
             {touched.reward && errors.reward ? (
               <div className="text-red-500 text-sm mt-1">{errors.reward}</div>
+            ) : null}
+          </div>
+          
+          <div>
+            <Input
+              name="numberOfParticipants"
+              placeholder="Number of Participants"
+              className={cn(
+                touched.numberOfParticipants && errors.numberOfParticipants ? "border-red-500" : ""
+              )}
+              value={values.numberOfParticipants}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            {touched.numberOfParticipants && errors.numberOfParticipants ? (
+              <div className="text-red-500 text-sm mt-1">{errors.numberOfParticipants}</div>
             ) : null}
           </div>
 

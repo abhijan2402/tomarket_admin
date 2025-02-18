@@ -72,6 +72,7 @@ export default function EditTask({ refetch, data }) {
       type: data?.platformLogo || "",
       category: data?.category || "",
       proof: data.proof || "no",
+      numberOfParticipants: data.numberOfParticipants || 0,
     },
     validationSchema: Yup.object({
       title: Yup.string().required("Title is required"),
@@ -80,6 +81,7 @@ export default function EditTask({ refetch, data }) {
       link: Yup.string().url("Invalid URL").required("Link is required"),
       type: Yup.string().required("Type is required"),
       category: Yup.string().required("category is required"),
+      numberOfParticipants: Yup.number().required("Number Of Participants is required"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
@@ -92,6 +94,7 @@ export default function EditTask({ refetch, data }) {
           platformLogo: values.type,
           type: "single",
           category: values.category,
+          numberOfParticipants: values.numberOfParticipants,
           updatedAt: serverTimestamp(),
         });
         toast.success("Task updated successfully");
@@ -197,6 +200,22 @@ if(values.description) {
             />
             {touched.reward && errors.reward ? (
               <div className="text-red-500 text-sm mt-1">{errors.reward}</div>
+            ) : null}
+          </div>
+
+          <div>
+            <Input
+              name="numberOfParticipants"
+              placeholder="Number of Participants"
+              className={cn(
+                touched.numberOfParticipants && errors.numberOfParticipants ? "border-red-500" : ""
+              )}
+              value={values.numberOfParticipants}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+            {touched.numberOfParticipants && errors.numberOfParticipants ? (
+              <div className="text-red-500 text-sm mt-1">{errors.numberOfParticipants}</div>
             ) : null}
           </div>
 

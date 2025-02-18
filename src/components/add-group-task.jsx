@@ -42,6 +42,7 @@ export default function AddGroupTask({ refetch }) {
   const { user } = useAuth();
   const [description, setDescription] = useState("");
   const [thumbnail, setThumbnail] = useState(null);
+  const [numberOfParticipants, setNumberOfParticipants] = useState(10);
 
   const {
     values,
@@ -111,6 +112,10 @@ export default function AddGroupTask({ refetch }) {
         return toast.error("Please add a description");
       }
 
+      if (!numberOfParticipants) {
+        return toast.error("Please add a Number of Participants");
+      }
+
       if (!thumbnail) {
         return toast.error("Please add a thumbnail");
       }
@@ -132,11 +137,12 @@ export default function AddGroupTask({ refetch }) {
         thumbnail: thumbnailUrl,
         description,
         type: "group",
+        numberOfParticipants
       });
 
       setTasks([]);
-      setDescription(false)
-      setThumbnail(null)
+      setDescription(false);
+      setThumbnail(null);
       refetch();
       setIsOpen(false);
       toast.success("Task added successfully");
@@ -194,6 +200,18 @@ export default function AddGroupTask({ refetch }) {
         </div>
 
         <div>
+            <Input
+              name="numberOfParticipants"
+              type="text"
+              placeholder="numberOfParticipants"
+             
+              value={numberOfParticipants}
+              onChange={(e) => setNumberOfParticipants(e.target.value)}
+            />
+         
+          </div>
+
+        <div>
           <label className="block text-sm font-medium text-gray-700">
             Thumbnail
           </label>
@@ -204,7 +222,6 @@ export default function AddGroupTask({ refetch }) {
             className="mt-1"
           />
         </div>
-        
 
         {tasks?.length ? (
           <div className="border border-primary p-2 rounded-md">
