@@ -119,7 +119,7 @@ export default function Task() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold md:text-2xl">Multi Task</h1>
+        <h1 className="text-lg font-semibold md:text-2xl">Group Task</h1>
 
         <AddGroupTask refetch={refetch} />
       </div>

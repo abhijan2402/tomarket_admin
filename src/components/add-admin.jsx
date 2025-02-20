@@ -17,13 +17,15 @@ import { db } from "@/lib/firebase";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function AddAdmin({ refetch }) {
   const [isOpen, setIsOpen] = useState(false);
   const {user} = useAuth()
+  const navigate = useNavigate()
 
   // Check if the current user is a super-admin
   if (!user || user?.role !== "super-admin") {
@@ -59,16 +61,21 @@ export default function AddAdmin({ refetch }) {
         const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
         const newUser = userCredential.user;
 
-        // Store additional info in Firestore under the "users" collection
+        // Store additional info in Firestore
         await setDoc(doc(db, "users", newUser.uid), {
           name: values.name,
           email: values.email,
           role: values.role,
           isActive: true,
           createdAt: serverTimestamp(),
-          createdBy: user?.id, 
+          createdBy: user?.id,
         });
-
+    
+        // Sign out the newly created user
+        await signOut(auth);
+        window.location.reload()
+        
+    
         resetForm();
         refetch();
         setIsOpen(false);
